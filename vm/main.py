@@ -1,7 +1,11 @@
-from core import runtime
+from core.runtime import VirtualMachine
+from core.program import Program
 
 def main():
-    runtime.run_program()
+
+    vm = VirtualMachine()
+    program = Program([])
+    vm.run_program(program)
 
 if __name__ == "__main__":
     main()
