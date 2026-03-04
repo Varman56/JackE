@@ -46,7 +46,7 @@ source .venv/bin/activate
 ### Запуск VM
 
 ```bash
-uv run python vm/main.py
+uv run python main.py
 ```
 
 ### workflow перед коммитом
@@ -61,7 +61,7 @@ uv run ruff format .
 uv run ruff check --fix .
 
 # 3. Проверка типов
-uv run mypy vm/ cmplr/
+uv run mypy vm/ cmplr/ main.py
 
 # 4. Если все ОК, коммитим
 git add .

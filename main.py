@@ -1,5 +1,5 @@
-from core.runtime import VirtualMachine
-from core.program import Program
+from vm.core.runtime import VirtualMachine
+from vm.core.program import Program
 
 
 def main():

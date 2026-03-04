@@ -15,17 +15,19 @@ class Tokenizer:
             if cur_symb.isspace():  # Space symbols ignored
                 self.parse_index += 1
                 self.cur_col += 1
-            elif cur_symb == '\n':  # \n ignored
+            elif cur_symb == "\n":  # \n ignored
                 self.parse_index += 1
                 self.cur_row += 1
                 self.cur_col = 0
             elif self.parse_index < len(self.text) - 1:  # Comments
-                if cur_symb == self.text[self.parse_index + 1] == '/':  # 1-row comments
+                if cur_symb == self.text[self.parse_index + 1] == "/":  # 1-row comments
                     self.skip_until_s("\n")
                     self.parse_index += 1
                     self.cur_col = 0
                     self.cur_row += 1
-                elif cur_symb == '/' and self.text[self.parse_index + 1] == '*':  # n-row comments
+                elif (
+                    cur_symb == "/" and self.text[self.parse_index + 1] == "*"
+                ):  # n-row comments
                     if not self.skip_until_s("*/"):
                         raise SyntaxError("Multiline comments should be closed")
                     self.cur_col += 2
@@ -36,9 +38,9 @@ class Tokenizer:
                 break
 
     def skip_until_s(self, substr):
-        while self.text[self.parse_index:self.parse_index + len(substr)] != substr:
+        while self.text[self.parse_index : self.parse_index + len(substr)] != substr:
             self.cur_col += 1
-            if self.text[self.parse_index] == '\n':
+            if self.text[self.parse_index] == "\n":
                 self.cur_col = 0
                 self.cur_row += 1
             self.parse_index += 1
@@ -47,4 +49,4 @@ class Tokenizer:
         return True
 
     def __str__(self):
-        return self.text[self.parse_index:]
+        return self.text[self.parse_index :]
