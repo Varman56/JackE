@@ -61,7 +61,7 @@ uv run ruff format .
 uv run ruff check --fix .
 
 # 3. Проверка типов
-uv run mypy .
+uv run mypy vm/ cmplr/
 
 # 4. Если все ОК, коммитим
 git add .
@@ -73,7 +73,7 @@ git commit -m "your commit message"
 ### Альтернатива: все в одной строке
 
 ```bash
-uv run ruff format . && uv run ruff check --fix . && uv run mypy . && echo "✅ All checks passed!"
+ruff format . && uv run ruff check --fix . && mypy vm/ cmplr/ && echo "✅ All checks passed!"
 ```
 
 ## Добавление новых зависимостей
