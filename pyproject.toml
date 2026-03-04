@@ -3,4 +3,7 @@ name = "jacke"
 description = "Jack compilation and run"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+version = "0.01"
+dependencies = [
+    "ruff>=0.15.4",
+]
