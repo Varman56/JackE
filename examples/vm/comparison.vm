@@ -1,0 +1,15 @@
+// Leave three boolean results on the stack.
+// 6 == 6 -> -1
+push constant 6
+push constant 6
+eq
+
+// 9 > 3 -> -1
+push constant 9
+push constant 3
+gt
+
+// 2 < 5 -> -1
+push constant 2
+push constant 5
+lt
