@@ -1,0 +1,6 @@
+// Entry point for multi-file function test
+function Main.main 0
+push constant 7
+push constant 8
+call Math.multiply 2
+return
