@@ -1,5 +1,6 @@
 from tokenizer.token import Token
 from tokenizer.token_type import TokenType
+from errors.tokenizer_errors import *
 
 
 class Tokenizer:
@@ -41,7 +42,7 @@ class Tokenizer:
                         cur_symb == "/" and self.text[self.parse_index + 1] == "*"
                 ):  # n-row comments
                     if not self.skip_until_s("*/"):
-                        raise SyntaxError("Multiline comments should be closed")
+                        raise ERR_TOKEN_MULTILINE_COMMENTS_NOT_CLOSED
                     self.cur_col += 2
                     self.parse_index += 2
                 else:
@@ -69,7 +70,7 @@ class Tokenizer:
                       self.parse_integer_constant() or \
                       self.parse_identifier_and_keywords()
                 if not res:
-                    raise ValueError("Token cant be parsed")
+                    raise ERR_TOKEN_UNKNOWN
 
     def parse_symbol(self):
         cur_symb = self.text[self.parse_index]
@@ -86,11 +87,11 @@ class Tokenizer:
             self.parse_index += 1
             while self.parse_index < len(self.text) and self.text[self.parse_index] != '"':
                 if self.text[self.parse_index] == '\n':
-                    raise ValueError("Newline in string constant")
+                    raise ERR_TOKEN_BAD_SYMBOL
                 sb.append(self.text[self.parse_index])
                 self.parse_index += 1
             if self.parse_index == len(self.text) and self.text[self.parse_index - 1] != '"':
-                raise ValueError("Unterminated string constant")  # TODO: test+check
+                raise ERR_TOKEN_STRING_CONSTANT_NOT_CLOSED  # TODO: test+check
             self.parse_index += 1
             self.tokens.append(Token(TokenType.stringConstant, ''.join(sb), self.cur_row, self.cur_col))
             self.cur_col += len(sb)
@@ -113,9 +114,9 @@ class Tokenizer:
                     self.cur_col += len(sb)
                     return True
                 else:
-                    raise ValueError("Integer constant too large")
+                    raise ERR_TOKEN_BAD_INTEGER
             except ValueError:
-                raise ValueError("Invalid integer constant")
+                raise ERR_TOKEN_INVALID_INTEGER
         return False
 
     def parse_identifier_and_keywords(self):
