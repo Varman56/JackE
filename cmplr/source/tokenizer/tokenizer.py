@@ -20,7 +20,8 @@ class Tokenizer:
         self.symbols = set("{}()[].,;+-*/&|<>=~")
 
     def tokenize(self):
-        pass
+        self.parse_code()
+        return self.tokens
 
     def trim_left(self):
         while self.parse_index < len(self.text):
