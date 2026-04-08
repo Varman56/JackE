@@ -65,12 +65,18 @@ LetStatement -> 'let' VarName '[' Expression ']' '=' Expression ';'
 
 IfStatement -> IfHeader '{' StatementsList '}'
 IfStatement -> IfHeader '{' StatementsList '}' ElsePart
+IfStatement -> IfHeader '{' '}'
+IfStatement -> IfHeader '{' '}' ElsePart
 
 IfHeader -> 'if' '(' Expression ')'
-ElsePart -> 'else' '{' StatementsList '}'
 
-WhileStatement -> 'while' '(' Expression ')' '{' '}'
-WhileStatement -> 'while' '(' Expression ')' '{' StatementsList '}'
+ElsePart -> 'else' '{' StatementsList '}'
+ElsePart -> 'else' '{' '}'
+
+WhileHeader -> 'while'
+WhileCondition -> WhileHeader '(' Expression ')'
+WhileStatement -> WhileCondition '{' StatementsList '}'
+WhileStatement -> WhileCondition '{' '}'
 
 DoStatement -> 'do' SubroutineCall ';'
 

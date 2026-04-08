@@ -80,7 +80,6 @@ class Automata:
 
     def closure(self, items):
         closure_set = set(items)
-        # Используем строковые представления для отслеживания уже добавленных правил
         added_symbols = set()
 
         changed = True
