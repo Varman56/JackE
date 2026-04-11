@@ -7,8 +7,8 @@ class Tokenizer:
     def __init__(self, text):
         self.text = text
         self.parse_index = 0
-        self.cur_row = 0
-        self.cur_col = 0
+        self.cur_row = 1
+        self.cur_col = 1
         self.tokenStack = []
         self.tokens = []
 
@@ -26,18 +26,18 @@ class Tokenizer:
     def trim_left(self):
         while self.parse_index < len(self.text):
             cur_symb = self.text[self.parse_index]
-            if cur_symb.isspace():  # Space symbols ignored
-                self.parse_index += 1
-                self.cur_col += 1
-            elif cur_symb == "\n":  # \n ignored
+            if cur_symb == "\n":  # \n ignored
                 self.parse_index += 1
                 self.cur_row += 1
-                self.cur_col = 0
+                self.cur_col = 1
+            elif cur_symb.isspace():  # Space symbols ignored
+                self.parse_index += 1
+                self.cur_col += 1
             elif self.parse_index < len(self.text) - 1:  # Comments
                 if cur_symb == self.text[self.parse_index + 1] == "/":  # 1-row comments
                     self.skip_until_s("\n")
                     self.parse_index += 1
-                    self.cur_col = 0
+                    self.cur_col = 1
                     self.cur_row += 1
                 elif (
                         cur_symb == "/" and self.text[self.parse_index + 1] == "*"
@@ -55,7 +55,7 @@ class Tokenizer:
         while self.text[self.parse_index: self.parse_index + len(substr)] != substr:
             self.cur_col += 1
             if self.text[self.parse_index] == "\n":
-                self.cur_col = 0
+                self.cur_col = 1
                 self.cur_row += 1
             self.parse_index += 1
             if self.parse_index + len(substr) - 1 >= len(self.text):
@@ -95,7 +95,7 @@ class Tokenizer:
                 raise ERR_TOKEN_STRING_CONSTANT_NOT_CLOSED  # TODO: test+check
             self.parse_index += 1
             self.tokens.append(Token(TokenType.stringConstant, ''.join(sb), self.cur_row, self.cur_col))
-            self.cur_col += len(sb)
+            self.cur_col += len(sb) + 2
             return True
         return False
 
