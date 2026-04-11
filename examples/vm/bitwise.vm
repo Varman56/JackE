@@ -1,0 +1,11 @@
+// Demonstrate logical and unary operations.
+// (12 & 10) | 3 = 11, then negate and bitwise not intermediate values.
+push constant 12
+push constant 10
+and
+push constant 3
+or
+push constant 5
+neg
+push constant 0
+not

@@ -1,0 +1,19 @@
+// Use pointer, this, that, and temp segments.
+push constant 3030
+pop pointer 0
+push constant 4040
+pop pointer 1
+
+push constant 17
+pop this 2
+push constant 23
+pop that 1
+
+push constant 99
+pop temp 2
+
+push this 2
+push that 1
+add
+push temp 2
+add

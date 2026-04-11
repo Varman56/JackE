@@ -1,4 +1,4 @@
-from core.instruction import Instruction
+from vm.core.instruction import Instruction
 
 
 class Program:
@@ -12,7 +12,7 @@ class Program:
         self._current_instruction_index = index
 
     def next_instruction(self):
-        self.jump_to_instruction(self._current_instruction_index + 1)
+        self._current_instruction_index += 1
 
     def get_current_instruction(self) -> Instruction:
         if self._current_instruction_index >= len(self.instructions):

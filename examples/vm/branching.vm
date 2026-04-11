@@ -1,0 +1,8 @@
+// If the condition is true, skip the fallback value.
+push constant 1
+if-goto USE_TRUE
+push constant 999
+goto END
+label USE_TRUE
+push constant 42
+label END
