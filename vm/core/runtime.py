@@ -3,11 +3,16 @@ Hack Virtual Machine Runtime
 Эмулятор виртуальной машины из курса Nand to Tetris
 """
 
+
 from vm.core.instruction import Function, Label
 from vm.core.program import Program
 from vm.core.memory import VMMemory
+from vm.builtin.array import ArrayLibrary
+from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
+from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
+from vm.builtin.string import StringLibrary
 
 
 class VirtualMachine:
@@ -35,6 +40,10 @@ class VirtualMachine:
 
     def _register_builtin_libraries(self):
         self.builtin_registry.register_library(MathLibrary())
+        self.builtin_registry.register_library(ArrayLibrary())
+        self.builtin_registry.register_library(StringLibrary())
+        self.builtin_registry.register_library(OutputLibrary())
+        self.builtin_registry.register_library(KeyboardLibrary())
 
     def run_program(self, program: Program):
         """
@@ -100,6 +109,6 @@ class VirtualMachine:
             )
 
         args = [self.memory.pop() for _ in range(num_args)][::-1]
-        result = builtin_function.implementation(args)
+        result = builtin_function.implementation(args, self)
         self.memory.push(result)
         return True

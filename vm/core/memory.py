@@ -27,6 +27,8 @@ class VMMemory:
     THAT = 4  # That pointer
     TEMP_BASE = 5  # Temp segment base (5-12)
     STATIC_BASE = 16  # Static variables start
+    HEAP_START = 2048  # Начало кучи для объектов (Array, String)
+    HEAP_LIMIT = 16384  # До экрана Hack RAM
 
     def __init__(self, memory_size: int = 32768):
         """
@@ -51,6 +53,10 @@ class VMMemory:
         self.static_vars: dict[str, list[int]] = {}
         self.current_file = ""
         self.set_current_file("default")
+
+        # Простая куча без переиспользования освобожденных блоков.
+        self.heap_next_free = self.HEAP_START
+        self.heap_allocations: dict[int, int] = {}
 
     def set_current_file(self, filename: str):
         """Устанавливает текущий файл для static переменных"""
@@ -170,3 +176,36 @@ class VMMemory:
     def set_that_pointer(self, value: int):
         """Устанавливает THAT указатель"""
         self.memory[self.THAT] = value
+
+    def allocate_heap(self, words: int) -> int:
+        """Выделяет блок в куче и возвращает базовый адрес."""
+        if words <= 0:
+            raise ValueError(f"Heap allocation size must be positive, got: {words}")
+
+        base_address = self.heap_next_free
+        end_address = base_address + words
+
+        if end_address > self.HEAP_LIMIT:
+            raise ValueError(
+                f"Heap overflow: requested {words} words, available {self.HEAP_LIMIT - self.heap_next_free}"
+            )
+
+        self.heap_allocations[base_address] = words
+        self.heap_next_free = end_address
+
+        for address in range(base_address, end_address):
+            self.memory[address] = 0
+
+        return base_address
+
+    def free_heap(self, base_address: int):
+        """Освобождает ранее выделенный блок кучи."""
+        if base_address == 0:
+            return
+
+        words = self.heap_allocations.pop(base_address, None)
+        if words is None:
+            raise ValueError(f"Unknown heap allocation address: {base_address}")
+
+        for address in range(base_address, base_address + words):
+            self.memory[address] = 0

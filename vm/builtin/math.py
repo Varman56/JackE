@@ -1,6 +1,10 @@
 import math
+from typing import TYPE_CHECKING
 
 from vm.builtin.registry import BuiltinFunction
+
+if TYPE_CHECKING:
+    from vm.core.runtime import VirtualMachine
 
 
 class MathLibrary:
@@ -18,37 +22,37 @@ class MathLibrary:
         }
 
     @staticmethod
-    def _init(args: list[int]) -> int:
+    def _init(args: list[int], vm: VirtualMachine) -> int:
         return 0
 
     @staticmethod
-    def _abs(args: list[int]) -> int:
+    def _abs(args: list[int], vm: VirtualMachine) -> int:
         return abs(args[0])
 
     @staticmethod
-    def _multiply(args: list[int]) -> int:
+    def _multiply(args: list[int], vm: VirtualMachine) -> int:
         left, right = args
         return left * right
 
     @staticmethod
-    def _divide(args: list[int]) -> int:
+    def _divide(args: list[int], vm: VirtualMachine) -> int:
         left, right = args
         if right == 0:
             raise ValueError("Math.divide: деление на ноль")
         return left // right
 
     @staticmethod
-    def _min(args: list[int]) -> int:
+    def _min(args: list[int], vm: VirtualMachine) -> int:
         left, right = args
         return left if left <= right else right
 
     @staticmethod
-    def _max(args: list[int]) -> int:
+    def _max(args: list[int], vm: VirtualMachine) -> int:
         left, right = args
         return left if left >= right else right
 
     @staticmethod
-    def _sqrt(args: list[int]) -> int:
+    def _sqrt(args: list[int], vm: VirtualMachine) -> int:
         value = args[0]
         if value < 0:
             raise ValueError("Math.sqrt: отрицательный аргумент")
