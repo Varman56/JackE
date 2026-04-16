@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Protocol
+from typing import TYPE_CHECKING, Callable, Protocol
+
+if TYPE_CHECKING:
+    from vm.core.runtime import VirtualMachine
 
 
 @dataclass(frozen=True)
 class BuiltinFunction:
     num_args: int
-    implementation: Callable[[list[int]], int]
+    implementation: Callable[[list[int], VirtualMachine], int]
 
 
 class BuiltinLibrary(Protocol):
