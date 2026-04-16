@@ -6,23 +6,14 @@ Hack VM - главный файл для запуска виртуальной �
 import argparse
 from pathlib import Path
 
+from vm.core.instruction import Function
 from vm.core.program import Program
 from vm.core.runtime import VirtualMachine
 from vm.parser.vm_parser import VMParser
 
 
-def parse_vm_input(input_path: Path) -> Program:
-    """Парсит один VM-файл или директорию с несколькими VM-файлами."""
-    vm_parser = VMParser()
-
-    if input_path.is_file():
-        return vm_parser.parse_file(str(input_path))
-
-    vm_files = sorted(input_path.glob("*.vm"))
-    if not vm_files:
-        raise ValueError(f"В директории '{input_path}' нет .vm файлов")
-
-    instructions = []
+def _wrap_with_bootstrap(vm_parser: VMParser, instructions: list) -> Program:
+    wrapped_instructions = []
 
     bootstrap = vm_parser.parse_lines(
         [
@@ -31,16 +22,40 @@ def parse_vm_input(input_path: Path) -> Program:
         ],
         source_file="bootstrap",
     )
-    instructions.extend(bootstrap.instructions)
+    wrapped_instructions.extend(bootstrap.instructions)
+    wrapped_instructions.extend(instructions)
+
+    end_label = vm_parser.parse_lines(["label __VM_END__"], source_file="bootstrap")
+    wrapped_instructions.extend(end_label.instructions)
+
+    return Program(wrapped_instructions)
+
+
+def parse_vm_input(input_path: Path) -> Program:
+    """Парсит один VM-файл или директорию с несколькими VM-файлами."""
+    vm_parser = VMParser()
+
+    if input_path.is_file():
+        program = vm_parser.parse_file(str(input_path))
+        has_main = any(
+            isinstance(instruction, Function) and instruction.name == "Main.main"
+            for instruction in program.instructions
+        )
+        if has_main:
+            return _wrap_with_bootstrap(vm_parser, program.instructions)
+        return program
+
+    vm_files = sorted(input_path.glob("*.vm"))
+    if not vm_files:
+        raise ValueError(f"В директории '{input_path}' нет .vm файлов")
+
+    instructions = []
 
     for vm_file in vm_files:
         program = vm_parser.parse_file(str(vm_file))
         instructions.extend(program.instructions)
 
-    end_label = vm_parser.parse_lines(["label __VM_END__"], source_file="bootstrap")
-    instructions.extend(end_label.instructions)
-
-    return Program(instructions)
+    return _wrap_with_bootstrap(vm_parser, instructions)
 
 
 def main():
