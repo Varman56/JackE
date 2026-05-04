@@ -12,6 +12,7 @@ from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
 from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
+from vm.builtin.screen import ScreenLibrary
 from vm.builtin.string import StringLibrary
 
 
@@ -38,12 +39,16 @@ class VirtualMachine:
         self.call_stack = []
         self.return_address_counter = 0
 
+        if self.gui:
+            self.execute_builtin_call("Screen.init", 0)
+
     def _register_builtin_libraries(self):
         self.builtin_registry.register_library(MathLibrary())
         self.builtin_registry.register_library(ArrayLibrary())
         self.builtin_registry.register_library(StringLibrary())
         self.builtin_registry.register_library(OutputLibrary())
         self.builtin_registry.register_library(KeyboardLibrary())
+        self.builtin_registry.register_library(ScreenLibrary())
 
     def run_program(self, program: Program):
         """
