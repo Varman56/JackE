@@ -18,7 +18,7 @@ class SLRParser:
             for item in state:
                 if item.next_symbol is None:
                     if item.rule.left == self.reader.rules[0].left:
-                        self.set_action(i, '$', "ACC")
+                        self.set_action(i, "$", "ACC")
                     else:
                         follow_set = self.automata.follow.get(item.rule.left, set())
                         for terminal in follow_set:
@@ -37,16 +37,20 @@ class SLRParser:
     def set_action(self, state_idx, terminal, action):
         current = self.action_table.get((state_idx, terminal))
         if current and current != action:
-            self.errors.append(f"Конфликт в состоянии {state_idx} по символу {terminal}: {current} vs {action}")
-            if current.startswith('S') and action.startswith('R'):
+            self.errors.append(
+                f"Конфликт в состоянии {state_idx} по символу {terminal}: {current} vs {action}"
+            )
+            if current.startswith("S") and action.startswith("R"):
                 return
         self.action_table[(state_idx, terminal)] = action
 
     def save_table_to_csv(self, filename):
         terminals = sorted(list(self.reader.terminals))
-        non_terminals = sorted(list(self.reader.non_terminals - {self.reader.rules[0].left}))
+        non_terminals = sorted(
+            list(self.reader.non_terminals - {self.reader.rules[0].left})
+        )
 
-        with open(filename, 'w', newline='', encoding='utf-8') as f:
+        with open(filename, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             header = ["State"] + terminals + non_terminals
             writer.writerow(header)

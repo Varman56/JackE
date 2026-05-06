@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class NTTitle(StrEnum):
     S = "S"
     ClassVarDecList = "ClassVarDecList"

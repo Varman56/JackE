@@ -1,12 +1,17 @@
 from compiler.source.tokenizer.token_type import TokenType
 from compiler.source.code_generator.symbol_table import SymbolKind, SymbolTable
-from compiler.source.code_generator.non_terminal import *
-from compiler.source.code_generator.non_terminal_title import NTTitle
+from compiler.source.code_generator.non_terminal import (
+    NonTerminal,
+    NTwithCode,
+    NTTitle,
+    NTwithVarList,
+    NTwithTypedVarList,
+    Token,
+)
 from compiler.source.code_generator.var_types import VarTypes
 
 
 class CodeGenerator:
-
     def __init__(self, writer):
         self.class_name = ""
         self.label_idx = 0
@@ -25,7 +30,10 @@ class CodeGenerator:
         # S -> 'class' ClassName '{' '}'
         if lhs == NTTitle.S:
             for arg in args:
-                if isinstance(arg, NTwithCode) and arg.title == NTTitle.SubroutineDecList:
+                if (
+                    isinstance(arg, NTwithCode)
+                    and arg.title == NTTitle.SubroutineDecList
+                ):
                     self.vm.output = arg.vm.get_collected()
             return NonTerminal(NTTitle.S, self._get_start_token(args[0]), "S")
 
@@ -37,7 +45,9 @@ class CodeGenerator:
         # ClassName -> identifier
         # SubroutineName -> identifier
         if lhs in (NTTitle.ClassName, NTTitle.VarName, NTTitle.SubroutineName):
-            return NonTerminal(NTTitle[lhs], self._get_start_token(args[0]), args[0].val)
+            return NonTerminal(
+                NTTitle[lhs], self._get_start_token(args[0]), args[0].val
+            )
 
         # ClassVarDecList -> ClassVarDec
         # ClassVarDecList -> ClassVarDecList ClassVarDec
@@ -51,7 +61,12 @@ class CodeGenerator:
             v_type = args[1].get_val()
             for name in args[2].get_var_list():
                 self.symbols.define(name, v_type, kind)
-            return NTwithVarList(NTTitle.ClassVarDec, self._get_start_token(args[0]), v_type, var_list=args[2].get_var_list())
+            return NTwithVarList(
+                NTTitle.ClassVarDec,
+                self._get_start_token(args[0]),
+                v_type,
+                var_list=args[2].get_var_list(),
+            )
 
         # Type -> 'int'
         # Type -> 'char'
@@ -59,14 +74,23 @@ class CodeGenerator:
         # Type -> ClassName
         if lhs == NTTitle.Type:
             if not isinstance(args[0], Token):
-                return NonTerminal(NTTitle.ClassName, self._get_start_token(args[0]), args[0].val)
-            return NonTerminal(NTTitle.Type, self._get_start_token(args[0]), VarTypes[args[0].val])
+                return NonTerminal(
+                    NTTitle.ClassName, self._get_start_token(args[0]), args[0].val
+                )
+            return NonTerminal(
+                NTTitle.Type, self._get_start_token(args[0]), VarTypes[args[0].val]
+            )
 
         # VarNameList -> VarName
         # VarNameList -> VarNameList ',' VarName
         if lhs == NTTitle.VarNameList:
             if len(args) == 1:
-                return NTwithVarList(NTTitle.VarNameList, self._get_start_token(args[0]), VarTypes.unknown, var_list=[args[0].val])
+                return NTwithVarList(
+                    NTTitle.VarNameList,
+                    self._get_start_token(args[0]),
+                    VarTypes.unknown,
+                    var_list=[args[0].val],
+                )
             args[0].var_list.append(args[2].val)
             return args[0]
 
@@ -74,8 +98,11 @@ class CodeGenerator:
         # TypedVarNameList -> TypedVarNameList ',' Type VarName
         if lhs == NTTitle.TypedVarNameList:
             if len(args) == 2:
-                return NTwithTypedVarList(NTTitle.TypedVarNameList, self._get_start_token(args[0]),
-                                          typed_var_list=[(args[0].get_val(), args[1].val)])
+                return NTwithTypedVarList(
+                    NTTitle.TypedVarNameList,
+                    self._get_start_token(args[0]),
+                    typed_var_list=[(args[0].get_val(), args[1].val)],
+                )
             args[0].typed_var_list.append((args[2].get_val(), args[3].val))
             return args[0]
 
@@ -83,7 +110,9 @@ class CodeGenerator:
         # ParameterList -> '(' TypedVarNameList ')'
         if lhs == NTTitle.ParameterList:
             if len(args) == 2:
-                return NonTerminal(NTTitle.ParameterList, self._get_start_token(args[0]))
+                return NonTerminal(
+                    NTTitle.ParameterList, self._get_start_token(args[0])
+                )
             for p_type, p_name in args[1].get_typed_var_list():
                 self.symbols.define(p_name, p_type, SymbolKind.ARG)
             return NonTerminal(NTTitle.ParameterList, self._get_start_token(args[0]))
@@ -91,7 +120,9 @@ class CodeGenerator:
         # SubroutineDecList -> SubroutineDec
         # SubroutineDecList -> SubroutineDecList SubroutineDec
         if lhs == NTTitle.SubroutineDecList:
-            writable = NTwithCode(NTTitle.SubroutineDecList, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.SubroutineDecList, self._get_start_token(args[0])
+            )
             writable.extend(args[0].vm)
             if len(args) == 2:
                 writable.extend(args[1].vm)
@@ -102,19 +133,28 @@ class CodeGenerator:
             v_type = args[1].get_val()
             for name in args[2].get_var_list():
                 self.symbols.define(name, v_type, SymbolKind.VAR)
-            return NTwithVarList(NTTitle.VarDeclaration, self._get_start_token(args[0]), v_type, var_list=args[2].get_var_list())
+            return NTwithVarList(
+                NTTitle.VarDeclaration,
+                self._get_start_token(args[0]),
+                v_type,
+                var_list=args[2].get_var_list(),
+            )
 
         # VarDeclarationList -> VarDeclaration
         # VarDeclarationList -> VarDeclarationList VarDeclaration
         if lhs == NTTitle.VarDeclarationList:  # in subroutine
-            return NonTerminal(NTTitle.VarDeclarationList, self._get_start_token(args[0]))
+            return NonTerminal(
+                NTTitle.VarDeclarationList, self._get_start_token(args[0])
+            )
 
         # SubroutineBody -> '{' VarDeclarationList StatementsList '}'
         # SubroutineBody -> '{' VarDeclarationList '}'
         # SubroutineBody -> '{' StatementsList '}'
         # SubroutineBody -> '{' '}'
         if lhs == NTTitle.SubroutineBody:
-            writable = NTwithCode(NTTitle.SubroutineBody, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.SubroutineBody, self._get_start_token(args[0])
+            )
             for arg in args:
                 if isinstance(arg, NTwithCode) and arg.title == NTTitle.StatementsList:
                     writable.extend(arg.vm)
@@ -149,7 +189,9 @@ class CodeGenerator:
 
         # LetStatement -> 'let' VarName '=' Expression ';'
         # LetStatement -> 'let' VarName '[' Expression ']' '=' Expression ';'
-        if lhs == NTTitle.LetStatement:  # Expression already calculated and placed on stack
+        if (
+            lhs == NTTitle.LetStatement
+        ):  # Expression already calculated and placed on stack
             writable = NTwithCode(NTTitle.LetStatement, self._get_start_token(args[0]))
             if len(args) == 5:  # let VarName = Expression ;
                 writable.extend(args[3].vm)
@@ -157,7 +199,7 @@ class CodeGenerator:
                 idx = self.symbols.index_of(args[1])
                 writable.vm.write_pop(kind, idx)
             else:  # let VarName [ Expression ] = Expression ;
-                kind, index = self.symbols[args[0]]
+                kind, index = self.symbols[args[1]]
                 writable.vm.write_push(kind, index)
                 writable.extend(args[3].vm)
                 writable.vm.write_arithmetic("add")
@@ -175,7 +217,9 @@ class CodeGenerator:
         # ReturnStatement -> 'return' ';'
         # ReturnStatement -> 'return' Expression ';'
         if lhs == NTTitle.ReturnStatement:
-            writable = NTwithCode(NTTitle.ReturnStatement, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.ReturnStatement, self._get_start_token(args[0])
+            )
             if len(args) == 2:
                 writable.vm.write_push("constant", 0)
             else:
@@ -211,7 +255,9 @@ class CodeGenerator:
         # SubroutineCall -> VarName '.' SubroutineName '(' ExpressionList ')'
         # SubroutineCall -> ClassName '.' SubroutineName '(' ')'
         # SubroutineCall -> VarName '.' SubroutineName '(' ')'
-        if lhs == NTTitle.SubroutineCall:  # TODO: we need to understand, method/constructor/other func we have
+        if (
+            lhs == NTTitle.SubroutineCall
+        ):  # TODO: we need to understand, method/constructor/other func we have
             # writable = NTwithCode(NTTitle.SubroutineCall, args[0].start_token)
             # if args[0].title == lhs.SubroutineName:
             #     nargs = 1
@@ -228,7 +274,9 @@ class CodeGenerator:
         # ExpressionList -> Expression
         # ExpressionList -> ExpressionList ',' Expression
         if lhs == NTTitle.ExpressionList:
-            writable = NTwithCode(NTTitle.ExpressionList, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.ExpressionList, self._get_start_token(args[0])
+            )
             writable.extend(args[0].vm)
             if len(args) == 3:
                 writable.extend(args[2].vm)
@@ -237,7 +285,9 @@ class CodeGenerator:
         # UnaryOperationList -> UnaryOperation
         # UnaryOperationList -> UnaryOperationList UnaryOperation
         if lhs == NTTitle.UnaryOperationList:
-            writable = NTwithCode(NTTitle.UnaryOperationList, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.UnaryOperationList, self._get_start_token(args[0])
+            )
             writable.extend(args[0].vm)
             if len(args) == 2:
                 writable.extend(args[1].vm)
@@ -246,8 +296,10 @@ class CodeGenerator:
         # UnaryOperation -> '-'
         # UnaryOperation -> '~'
         if lhs == NTTitle.UnaryOperation:
-            writable = NTwithCode(NTTitle.UnaryOperation, self._get_start_token(args[0]))
-            if args[0].val == '-':
+            writable = NTwithCode(
+                NTTitle.UnaryOperation, self._get_start_token(args[0])
+            )
+            if args[0].val == "-":
                 writable.vm.write_arithmetic("neg")
             else:
                 writable.vm.write_arithmetic("not")
@@ -263,7 +315,12 @@ class CodeGenerator:
         if lhs == NTTitle.IfHeader:
             idx = self.label_idx
             self.label_idx += 2
-            writable = NTwithCode(NTTitle.IfHeader,self._get_start_token(args[0]), ifl1=f"IF_{idx}", ifl2=f"IF_{idx + 1}")
+            writable = NTwithCode(
+                NTTitle.IfHeader,
+                self._get_start_token(args[0]),
+                ifl1=f"IF_{idx}",
+                ifl2=f"IF_{idx + 1}",
+            )
             writable.extend(args[2].vm)
             writable.vm.write_arithmetic("not")
             writable.vm.write_if(writable.kwargs["ifl1"])
@@ -282,9 +339,11 @@ class CodeGenerator:
         # IfStatement -> IfHeader '{' '}'
         # IfStatement -> IfHeader '{' '}' ElsePart
         if lhs == NTTitle.IfStatement:
-            writable = NTwithCode(NTTitle.IfStatement, self._get_start_token(args[0]), **args[0].kwargs)
+            writable = NTwithCode(
+                NTTitle.IfStatement, self._get_start_token(args[0]), **args[0].kwargs
+            )
             writable.extend(args[0].vm)
-            if args[2].val != '}':
+            if args[2].val != "}":
                 writable.extend(args[2].vm)
             writable.vm.write_goto(writable.kwargs["ifl2"])
             writable.vm.write_label(writable.kwargs["ifl1"])
@@ -297,7 +356,11 @@ class CodeGenerator:
         if lhs == NTTitle.WhileHeader:
             idx = self.label_idx
             self.label_idx += 1
-            writable = NTwithCode(NTTitle.WhileHeader, self._get_start_token(args[0]), l1=f"WHILE_EXP{idx}")
+            writable = NTwithCode(
+                NTTitle.WhileHeader,
+                self._get_start_token(args[0]),
+                l1=f"WHILE_EXP{idx}",
+            )
             writable.vm.write_label(writable.kwargs["l1"])
             return writable
 
@@ -305,8 +368,12 @@ class CodeGenerator:
         if lhs == NTTitle.WhileCondition:
             idx = self.label_idx
             self.label_idx += 1
-            writable = NTwithCode(NTTitle.WhileCondition, self._get_start_token(args[0]),
-                                  l2=f"WHILE_EXP{idx}", **args[0].kwargs)
+            writable = NTwithCode(
+                NTTitle.WhileCondition,
+                self._get_start_token(args[0]),
+                l2=f"WHILE_EXP{idx}",
+                **args[0].kwargs,
+            )
             writable.extend(args[0].vm)
             writable.extend(args[2].vm)
             writable.vm.write_arithmetic("not")
@@ -316,7 +383,9 @@ class CodeGenerator:
         # WhileStatement -> WhileCondition '{' StatementsList '}'
         # WhileStatement -> WhileCondition '{' '}'
         if lhs == NTTitle.WhileStatement:
-            writable = NTwithCode(NTTitle.WhileStatement, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.WhileStatement, self._get_start_token(args[0])
+            )
             writable.extend(args[0].vm)
             if len(args) == 4:
                 writable.extend(args[2].vm)
@@ -327,7 +396,9 @@ class CodeGenerator:
         # StatementsList -> Statement
         # StatementsList -> StatementsList Statement
         if lhs == NTTitle.StatementsList:
-            writable = NTwithCode(NTTitle.StatementsList, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.StatementsList, self._get_start_token(args[0])
+            )
             writable.extend(args[0].vm)
             if len(args) == 2:
                 writable.extend(args[1].vm)
@@ -348,10 +419,12 @@ class CodeGenerator:
         # KeywordConstant -> 'null'
         # KeywordConstant -> 'this'
         if lhs == NTTitle.KeywordConstant:
-            writable = NTwithCode(NTTitle.KeywordConstant, self._get_start_token(args[0]))
-            if args[0].val == 'null' or args[0].val == 'false':
+            writable = NTwithCode(
+                NTTitle.KeywordConstant, self._get_start_token(args[0])
+            )
+            if args[0].val == "null" or args[0].val == "false":
                 writable.vm.write_push("constant", 0)
-            elif args[0].val == 'true':
+            elif args[0].val == "true":
                 writable.vm.write_push("constant", 1)
                 writable.vm.write_arithmetic("neg")
             else:
@@ -366,8 +439,11 @@ class CodeGenerator:
         # Term -> '(' Expression ')'
         # Term -> SubroutineCall
         if lhs == "Term":
-            writable = NTwithCode(NTTitle.Term, self._get_start_token(args[0])) if isinstance(args[0], Token) \
+            writable = (
+                NTwithCode(NTTitle.Term, self._get_start_token(args[0]))
+                if isinstance(args[0], Token)
                 else NTwithCode(NTTitle.Term, args[0].start_token)
+            )
             if isinstance(args[0], Token):
                 val = args[0]
                 if val.TokenType == TokenType.integerConstant:
@@ -379,7 +455,9 @@ class CodeGenerator:
                     for ch in s:
                         writable.vm.write_push("constant", ord(ch))
                         writable.vm.write_call("String.appendChar", 2)
-            elif len(args) == 4:  # TODO: Array implementation. Is current version  implemented correctly?
+            elif (
+                len(args) == 4
+            ):  # TODO: Array implementation. Is current version  implemented correctly?
                 kind, index = self.symbols[args[0]]
                 writable.vm.write_push(kind, index)
                 writable.extend(args[2].vm)  # Expression
@@ -396,7 +474,6 @@ class CodeGenerator:
             return writable
 
         raise SyntaxError()
-
 
     # def _handle_call(self, args):
     #     if len(args) in (3, 4):
@@ -421,10 +498,19 @@ class CodeGenerator:
     #             self.vm.write_call(f"{target}.{sub_name}", n_args)
 
     def _write_op_to_writer(self, op, writer):  # TODO: type checking
-        ops = {'+': 'add', '-': 'sub', '*': 'call Math.multiply 2', '/': 'call Math.divide 2',
-               '&': 'and', '|': 'or', '<': 'lt', '>': 'gt', '=': 'eq'}
+        ops = {
+            "+": "add",
+            "-": "sub",
+            "*": "call Math.multiply 2",
+            "/": "call Math.divide 2",
+            "&": "and",
+            "|": "or",
+            "<": "lt",
+            ">": "gt",
+            "=": "eq",
+        }
         cmd = ops[op]
-        if cmd.startswith('call'):
+        if cmd.startswith("call"):
             writer.output.append(cmd)
         else:
             writer.write_arithmetic(cmd)

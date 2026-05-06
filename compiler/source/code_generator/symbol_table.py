@@ -26,8 +26,12 @@ class SymbolTable:
 
     def define(self, name, type_str, kind):
         """Добавляет переменную в таблицу."""
-        target = self.class_symbols if kind in [SymbolKind.STATIC, SymbolKind.FIELD] else self.subroutine_symbols
-        target[name] = {'type': type_str, 'kind': kind, 'index': self.counts[kind]}
+        target = (
+            self.class_symbols
+            if kind in [SymbolKind.STATIC, SymbolKind.FIELD]
+            else self.subroutine_symbols
+        )
+        target[name] = {"type": type_str, "kind": kind, "index": self.counts[kind]}
         self.counts[kind] += 1
 
     def var_count(self, kind):
@@ -40,26 +44,30 @@ class SymbolTable:
 
     def kind_of(self, var: NonTerminal):
         self._check_unknown_symbol(var)
-        res = self.subroutine_symbols.get(var.get_val()) or self.class_symbols.get(var.get_val())
-        return res['kind']
+        res = self.subroutine_symbols.get(var.get_val()) or self.class_symbols.get(
+            var.get_val()
+        )
+        return res["kind"]
 
-    def __getitem__(self, var : NonTerminal):
+    def __getitem__(self, var: NonTerminal):
         self._check_unknown_symbol(var)
-        res = self.subroutine_symbols.get(var.get_val()) or self.class_symbols.get(var.get_val())
-        return res['kind'], res['index']
+        res = self.subroutine_symbols.get(var.get_val()) or self.class_symbols.get(
+            var.get_val()
+        )
+        return res["kind"], res["index"]
 
     def get_subroutine(self, name: str):
         res = self.subroutine_symbols.get(name)
-        return res['kind'], res['index']
+        return res["kind"], res["index"]
 
     def type_of(self, var: NonTerminal):
         self._check_unknown_symbol(var)
         name = var.get_val()
         res = self.subroutine_symbols.get(name) or self.class_symbols.get(name)
-        return res['type']
+        return res["type"]
 
     def index_of(self, var: NonTerminal):
         self._check_unknown_symbol(var)
         name = var.get_val()
         res = self.subroutine_symbols.get(name) or self.class_symbols.get(name)
-        return res['index']
+        return res["index"]

@@ -11,13 +11,13 @@ class GrammarReader:
 
     def read(self):
         rule_counter = 0
-        with open(self.filename, 'r', encoding='utf-8') as f:
+        with open(self.filename, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
-                if not line or '->' not in line:
+                if not line or "->" not in line:
                     continue
 
-                lhs_str, rhs_str = line.split('->')
+                lhs_str, rhs_str = line.split("->")
                 lhs = lhs_str.strip()
 
                 raw_rhs_symbols = rhs_str.strip().split()
@@ -37,4 +37,4 @@ class GrammarReader:
                 if symbol not in self.non_terminals:
                     self.terminals.add(symbol)
 
-        self.terminals.add('$') # TODO: check should we do this
+        self.terminals.add("$")  # TODO: check should we do this

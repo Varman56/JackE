@@ -31,7 +31,9 @@ class NTwithTypedVarList(NonTerminal):  # (type name, type name, ...)
 
 
 class NTwithVarList(NonTerminal):
-    def __init__(self, title, start_token, var_type: VarTypes, val="", var_list=[], **kwargs):
+    def __init__(
+        self, title, start_token, var_type: VarTypes, val="", var_list=[], **kwargs
+    ):
         super().__init__(title, start_token, val, **kwargs)
         self.var_list = var_list
         self.var_type = var_type

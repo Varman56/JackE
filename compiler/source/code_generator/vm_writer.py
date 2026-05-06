@@ -4,11 +4,11 @@ class VMWriter:
 
     def write_push(self, segment, index):
         # segment может быть строкой или SymbolKind.value
-        seg = segment.value if hasattr(segment, 'value') else segment
+        seg = segment.value if hasattr(segment, "value") else segment
         self.output.append(f"push {seg} {index}")
 
     def write_pop(self, segment, index):
-        seg = segment.value if hasattr(segment, 'value') else segment
+        seg = segment.value if hasattr(segment, "value") else segment
         self.output.append(f"pop {seg} {index}")
 
     def write_arithmetic(self, command):

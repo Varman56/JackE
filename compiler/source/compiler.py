@@ -1,4 +1,9 @@
-import shutil
+"""
+Jack Compiler
+Компилятор кода Jack из курса Nand to Tetris
+"""
+
+from shutil import rmtree
 from pathlib import Path
 
 from compiler.source.parser.parser import Parser
@@ -7,14 +12,18 @@ from compiler.source.grammar.slr import SLRParser
 
 
 class Compiler:
-    def __init__(self, path,
-                 out_path="./build",
-                 grammar_file="./compiler/source/grammar/grammar.slr",
-                 states_file="./compiler/source/grammar/jack_slr_table.csv",
-                 build_grammar=False,
-                 print_errors=True,
-                 pyout=print, pin=input,
-                 ignore_build_exist=False):
+    def __init__(
+        self,
+        path,
+        out_path="./build",
+        grammar_file="./compiler/source/grammar/grammar.slr",
+        states_file="./compiler/source/grammar/jack_slr_table.csv",
+        build_grammar=False,
+        print_errors=True,
+        pyout=print,
+        pin=input,
+        ignore_build_exist=False,
+    ):
         self.print_errors = print_errors
         self.path = Path(path)
         self.out_path = Path(out_path)
@@ -32,14 +41,16 @@ class Compiler:
         slr = SLRParser(filename=self.grammar_file, outfile=self.states_file)
         if self.print_errors:
             if slr.errors:
-                self.pyout(f"Обнаружено конфликтов: {len(slr.errors)}. Грамматика может быть не SLR(1).")
+                self.pyout(
+                    f"Обнаружено конфликтов: {len(slr.errors)}. Грамматика может быть не SLR(1)."
+                )
             for err in slr.errors:
                 self.pyout(err)
         self.pyout("Building complete!\n")
 
     def walkdir(self):
         files = []
-        for path in self.path.rglob('*.jack'):
+        for path in self.path.rglob("*.jack"):
             files.append(path)
         return files
 
@@ -60,17 +71,24 @@ class Compiler:
         return text
 
     def save_vm_file(self, vm_commands, jack_file_path):
-        vm_file_path = str(jack_file_path).replace(".jack", ".vm").replace("\\", "_").replace("/", "_")
-        with open(f"{self.out_path}\\{vm_file_path}", 'w', encoding='utf-8') as f:
+        vm_file_path = (
+            str(jack_file_path)
+            .replace(".jack", ".vm")
+            .replace("\\", "_")
+            .replace("/", "_")
+        )
+        with open(f"{self.out_path}\\{vm_file_path}", "w", encoding="utf-8") as f:
             f.write("\n".join(vm_commands) + "\n")
 
     def prepare_build(self):
         if self.out_path.exists():
             if not self.ignore_build_exist:
-                ans = self.pin("build дериктория будет очищена? введите 'y' для подтверждения: ")
+                ans = self.pin(
+                    "build дериктория будет очищена? введите 'y' для подтверждения: "
+                )
                 if ans != "y":
                     raise KeyboardInterrupt
-            shutil.rmtree(self.out_path)
+            rmtree(self.out_path)
         self.out_path.mkdir(parents=True, exist_ok=True)
 
     def compile(self):
