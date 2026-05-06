@@ -67,7 +67,7 @@ class CodeGenerator:
         if lhs == NTTitle.VarNameList:
             if len(args) == 1:
                 return NTwithVarList(NTTitle.VarNameList, self._get_start_token(args[0]), VarTypes.unknown, var_list=[args[0].val])
-            args[0].var_list.append(args[2].val)  # TODO: Check order of vars in list
+            args[0].var_list.append(args[2].val)
             return args[0]
 
         # TypedVarNameList -> Type VarName
@@ -76,7 +76,7 @@ class CodeGenerator:
             if len(args) == 2:
                 return NTwithTypedVarList(NTTitle.TypedVarNameList, self._get_start_token(args[0]),
                                           typed_var_list=[(args[0].get_val(), args[1].val)])
-            args[0].typed_var_list.append((args[2].get_val(), args[3].val))  # TODO: Check order of vars in list
+            args[0].typed_var_list.append((args[2].get_val(), args[3].val))
             return args[0]
 
         # ParameterList -> '(' ')'
@@ -139,7 +139,6 @@ class CodeGenerator:
                 writable.vm.write_push("constant", n_fields)
                 writable.vm.write_call("Memory.alloc", 1)
                 writable.vm.write_pop("pointer", 0)
-                # TODO: constructor should push pointer 0 -> return. How return work here?
             elif s_kind == "method":
                 writable.vm.write_push("argument", 0)
                 writable.vm.write_pop("pointer", 0)
@@ -158,16 +157,12 @@ class CodeGenerator:
                 idx = self.symbols.index_of(args[1])
                 writable.vm.write_pop(kind, idx)
             else:  # let VarName [ Expression ] = Expression ;
+                kind, index = self.symbols[args[0]]
+                writable.vm.write_push(kind, index)
                 writable.extend(args[3].vm)
-                var_token = args[1]
-                kind = self.symbols.kind_of(var_token)
-                idx = self.symbols.index_of(var_token)
-                writable.vm.write_push(kind, idx)
                 writable.vm.write_arithmetic("add")
-                writable.extend(args[6].vm)
-                writable.vm.write_pop("temp", 0)
                 writable.vm.write_pop("pointer", 1)
-                writable.vm.write_push("temp", 0)
+                writable.extend(args[6].vm)
                 writable.vm.write_pop("that", 0)  # TODO: check array using
             return writable
 
