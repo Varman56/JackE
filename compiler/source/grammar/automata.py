@@ -1,9 +1,9 @@
-from grammar.grammar_reader import GrammarReader
-from grammar.item import Item
+from compiler.source.grammar.grammar_reader import GrammarReader
+from compiler.source.grammar.item import Item
 
 
 class Automata:
-    def __init__(self, filename="grammar"):
+    def __init__(self, filename):
         self.reader = GrammarReader(filename)
 
         self.first = {}
@@ -75,7 +75,8 @@ class Automata:
         for nt, symbols in sorted(self.follow.items()):
             print(f"FOLLOW({nt:20}) = {{ {', '.join(sorted(symbols))} }}")
 
-    def state_to_key(self, items):
+    @staticmethod
+    def state_to_key(items):
         return "|".join(sorted([str(item) for item in items]))
 
     def closure(self, items):

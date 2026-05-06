@@ -74,7 +74,9 @@ ElsePart -> 'else' '{' StatementsList '}'
 ElsePart -> 'else' '{' '}'
 
 WhileHeader -> 'while'
+
 WhileCondition -> WhileHeader '(' Expression ')'
+
 WhileStatement -> WhileCondition '{' StatementsList '}'
 WhileStatement -> WhileCondition '{' '}'
 
@@ -89,7 +91,7 @@ Expression -> UnaryOperationList Term
 Expression -> Expression Operation UnaryOperationList Term
 
 UnaryOperationList -> UnaryOperation
-UnaryOperationList -> UnaryOperation UnaryOperationList
+UnaryOperationList -> UnaryOperationList UnaryOperation
 
 Term -> integerConstant
 Term -> stringConstant

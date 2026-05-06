@@ -1,6 +1,6 @@
-from tokenizer.token import Token
-from tokenizer.token_type import TokenType
-from errors.tokenizer_errors import *
+from compiler.source.tokenizer.token import Token
+from compiler.source.tokenizer.token_type import TokenType
+from compiler.source.errors.tokenizer_errors import *
 
 
 class Tokenizer:

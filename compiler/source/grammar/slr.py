@@ -1,16 +1,17 @@
 import csv
 
-from grammar.automata import Automata
+from compiler.source.grammar.automata import Automata
 
 
 class SLRParser:
-    def __init__(self, filename="grammar"):
+    def __init__(self, filename="grammar.slr", outfile="jack_slr_table.csv"):
         self.automata = Automata(filename)
         self.reader = self.automata.reader
         self.action_table = {}
         self.goto_table = {}
         self.errors = []
         self.build_tables()
+        self.save_table_to_csv(outfile)
 
     def build_tables(self):
         for i, state in enumerate(self.automata.states):
@@ -41,7 +42,7 @@ class SLRParser:
                 return
         self.action_table[(state_idx, terminal)] = action
 
-    def save_table_to_csv(self, filename="slr_table.csv"):
+    def save_table_to_csv(self, filename):
         terminals = sorted(list(self.reader.terminals))
         non_terminals = sorted(list(self.reader.non_terminals - {self.reader.rules[0].left}))
 
@@ -57,11 +58,3 @@ class SLRParser:
                 for nt in non_terminals:
                     row.append(self.goto_table.get((i, nt), ""))
                 writer.writerow(row)
-
-        if self.errors:
-            print(f"Обнаружено конфликтов: {len(self.errors)}. Грамматика может быть не SLR(1).")
-
-slr = SLRParser()
-slr.save_table_to_csv("jack_slr_table.csv")
-for err in slr.errors:
-    print(err)

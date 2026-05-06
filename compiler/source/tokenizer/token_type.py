@@ -7,3 +7,4 @@ class TokenType(Enum):
     integerConstant = 3
     stringConstant = 4
     identifier = 5
+    END = 6 # TODO: check how work with END

@@ -33,6 +33,5 @@ class VMWriter:
     def write_return(self):
         self.output.append("return")
 
-    def save(self, filename):
-        with open(filename, 'w') as f:
-            f.write("\n".join(self.output) + "\n")
+    def get_collected(self):
+        return self.output

@@ -1,8 +1,8 @@
-from grammar.rule import Rule
+from compiler.source.grammar.rule import Rule
 
 
 class GrammarReader:
-    def __init__(self, filename="grammar"):
+    def __init__(self, filename):
         self.filename = filename
         self.rules = []
         self.terminals = set()
@@ -37,4 +37,4 @@ class GrammarReader:
                 if symbol not in self.non_terminals:
                     self.terminals.add(symbol)
 
-        self.terminals.add('$')
+        self.terminals.add('$') # TODO: check should we do this

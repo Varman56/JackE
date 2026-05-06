@@ -4,3 +4,4 @@ ERR_TOKEN_BAD_SYMBOL = ValueError("Newline in string constant")
 ERR_TOKEN_STRING_CONSTANT_NOT_CLOSED = ValueError("Unterminated string constant")
 ERR_TOKEN_BAD_INTEGER = ValueError("Integer constant too large")
 ERR_TOKEN_INVALID_INTEGER = ValueError("Invalid integer constant")
+
