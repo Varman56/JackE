@@ -22,8 +22,7 @@ class VirtualMachine:
     Выполняет VM инструкции и управляет памятью
     """
 
-    def __init__(self, gui: bool = False, debug: bool = False):
-        self.gui = gui
+    def __init__(self, debug: bool = False):
         self.debug = debug
         self.memory = VMMemory()
         self.builtin_registry = BuiltinRegistry()
@@ -38,9 +37,6 @@ class VirtualMachine:
         # Стек вызовов для функций
         self.call_stack = []
         self.return_address_counter = 0
-
-        if self.gui:
-            self.execute_builtin_call("Screen.init", 0)
 
     def _register_builtin_libraries(self):
         self.builtin_registry.register_library(MathLibrary())
