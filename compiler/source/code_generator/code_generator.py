@@ -1,3 +1,5 @@
+from compiler.source.code_generator.vm_writer import VMWriter
+from compiler.source.errors.code_generator_errors import ErrUnknownFunc
 from compiler.source.tokenizer.token_type import TokenType
 from compiler.source.code_generator.symbol_table import SymbolKind, SymbolTable
 from compiler.source.code_generator.non_terminal import (
@@ -9,14 +11,16 @@ from compiler.source.code_generator.non_terminal import (
     Token,
 )
 from compiler.source.code_generator.var_types import VarTypes
+from compiler.source.precompile.subroutine_kind import SubroutineKind
 
 
 class CodeGenerator:
-    def __init__(self, writer):
+    def __init__(self, func_table):
         self.class_name = ""
         self.label_idx = 0
         self.symbols = SymbolTable()
-        self.vm = writer
+        self.vm = VMWriter()
+        self.subroutine_table = func_table
 
     def get_collected(self):
         return self.vm.get_collected()
@@ -31,8 +35,8 @@ class CodeGenerator:
         if lhs == NTTitle.S:
             for arg in args:
                 if (
-                    isinstance(arg, NTwithCode)
-                    and arg.title == NTTitle.SubroutineDecList
+                        isinstance(arg, NTwithCode)
+                        and arg.title == NTTitle.SubroutineDecList
                 ):
                     self.vm.output = arg.vm.get_collected()
             return NonTerminal(NTTitle.S, self._get_start_token(args[0]), "S")
@@ -190,7 +194,7 @@ class CodeGenerator:
         # LetStatement -> 'let' VarName '=' Expression ';'
         # LetStatement -> 'let' VarName '[' Expression ']' '=' Expression ';'
         if (
-            lhs == NTTitle.LetStatement
+                lhs == NTTitle.LetStatement
         ):  # Expression already calculated and placed on stack
             writable = NTwithCode(NTTitle.LetStatement, self._get_start_token(args[0]))
             if len(args) == 5:  # let VarName = Expression ;
@@ -256,20 +260,81 @@ class CodeGenerator:
         # SubroutineCall -> ClassName '.' SubroutineName '(' ')'
         # SubroutineCall -> VarName '.' SubroutineName '(' ')'
         if (
-            lhs == NTTitle.SubroutineCall
+                lhs == NTTitle.SubroutineCall
         ):  # TODO: we need to understand, method/constructor/other func we have
-            # writable = NTwithCode(NTTitle.SubroutineCall, args[0].start_token)
-            # if args[0].title == lhs.SubroutineName:
-            #     nargs = 1
-            #     if len(args) == 4:
-            #         writable.extend(args[3].vm)
-            #         nargs = args[3].get_kwargs()["nargs"]
-            #     writable.vm.write_push("pointer", 0)
-            #     writable.vm.write_call(f"{self.class_name}.{args[0].val}", 0)
-            # elif args[0].title == lhs.ClassName:
-            #
-            # return None
-            raise NotImplementedError()
+            writable = NTwithCode(NTTitle.SubroutineCall, self._get_start_token(args[0]))
+
+            if len(args) >= 2 and isinstance(args[1], Token) and args[1].val == '.':
+                prefix_node = args[0]  # NonTerminal (ClassName или VarName)
+                sub_name_node = args[2]  # NonTerminal SubroutineName
+                sub_name = sub_name_node.val
+
+                if prefix_node.title == NTTitle.VarName:
+                    name = prefix_node.val
+                    # Проверяем, существует ли переменная с таким именем
+                    if self.symbols.contains(name):
+                        # Это действительно объект: obj.method(...)
+                        var_type = self.symbols.type_of(prefix_node)
+                        full_name = f"{var_type}.{sub_name}"
+                        sig = self.subroutine_table.get(full_name)
+                        if sig is None:
+                            raise ErrUnknownFunc(full_name)
+
+                        kind = self.symbols.kind_of(prefix_node)
+                        idx = self.symbols.index_of(prefix_node)
+                        writable.vm.write_push(kind, idx)
+
+                        if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
+                            writable.extend(args[4].vm)
+
+                        # Для метода передаём неявный this
+                        n_args = sig.nargs + 1 if sig.kind == SubroutineKind.method else sig.nargs
+                        writable.vm.write_call(full_name, n_args)
+                    else:
+                        # Переменной нет – значит, это ClassName
+                        class_name = name
+                        full_name = f"{class_name}.{sub_name}"
+                        sig = self.subroutine_table.get(full_name)
+                        if sig is None:
+                            raise ErrUnknownFunc(full_name)
+
+                        if len(args) == 6:
+                            writable.extend(args[4].vm)
+
+                        writable.vm.write_call(full_name, sig.nargs)
+
+                else:  # prefix_node.title == NTTitle.ClassName
+                    class_name = prefix_node.val
+                    full_name = f"{class_name}.{sub_name}"
+                    sig = self.subroutine_table.get(full_name)
+                    if sig is None:
+                        raise ErrUnknownFunc(full_name)
+
+                    if len(args) == 6:
+                        writable.extend(args[4].vm)
+
+                    writable.vm.write_call(full_name, sig.nargs)
+
+            else:
+                # Вызов без точки: SubroutineName (в текущем классе)
+                sub_name = args[0].val
+                class_name = self.class_name
+                full_name = f"{class_name}.{sub_name}"
+                sig = self.subroutine_table.get(full_name)
+                if sig is None:
+                    raise ErrUnknownFunc(full_name)
+
+                if sig.kind == SubroutineKind.method:
+                    writable.vm.write_push("pointer", 0)
+                    if len(args) == 4:  # SubroutineName '(' ExpressionList ')'
+                        writable.extend(args[2].vm)
+                    writable.vm.write_call(full_name, sig.nargs + 1)
+                else:
+                    if len(args) == 4:
+                        writable.extend(args[2].vm)
+                    writable.vm.write_call(full_name, sig.nargs)
+
+            return writable
 
         # ExpressionList -> Expression
         # ExpressionList -> ExpressionList ',' Expression
@@ -384,7 +449,7 @@ class CodeGenerator:
         # WhileStatement -> WhileCondition '{' '}'
         if lhs == NTTitle.WhileStatement:
             writable = NTwithCode(
-                NTTitle.WhileStatement, self._get_start_token(args[0])
+                NTTitle.WhileStatement, self._get_start_token(args[0]), **args[0].kwargs
             )
             writable.extend(args[0].vm)
             if len(args) == 4:
@@ -446,9 +511,9 @@ class CodeGenerator:
             )
             if isinstance(args[0], Token):
                 val = args[0]
-                if val.TokenType == TokenType.integerConstant:
+                if val.token_type == TokenType.integerConstant:
                     writable.vm.write_push("constant", val.val)
-                elif val.TokenType == TokenType.stringConstant:
+                elif val.token_type == TokenType.stringConstant:
                     s = val.val
                     writable.vm.write_push("constant", len(s))
                     writable.vm.write_call("String.new", 1)
@@ -456,7 +521,7 @@ class CodeGenerator:
                         writable.vm.write_push("constant", ord(ch))
                         writable.vm.write_call("String.appendChar", 2)
             elif (
-                len(args) == 4
+                    len(args) == 4
             ):  # TODO: Array implementation. Is current version  implemented correctly?
                 kind, index = self.symbols[args[0]]
                 writable.vm.write_push(kind, index)
@@ -474,28 +539,6 @@ class CodeGenerator:
             return writable
 
         raise SyntaxError()
-
-    # def _handle_call(self, args):
-    #     if len(args) in (3, 4):
-    #         name = self._val(args[0])
-    #         n_args = args[2] if len(args) == 4 and isinstance(args[2], int) else 0
-    #         self.vm.write_push("pointer", 0)
-    #         self.vm.write_call(f"{self.class_name}.{name}", n_args + 1)
-    #         return
-    #
-    #     if len(args) in (5, 6):
-    #         target = self._val(args[0])
-    #         sub_name = self._val(args[2])
-    #         n_args = args[4] if len(args) == 6 and isinstance(args[4], int) else 0
-    #
-    #         kind = self.symbols.kind_of(target)
-    #         if kind != SymbolKind.NONE:
-    #             v_type = self.symbols.type_of(target)
-    #             idx = self.symbols.index_of(target)
-    #             self.vm.write_push(kind, idx)
-    #             self.vm.write_call(f"{v_type}.{sub_name}", n_args + 1)
-    #         else:
-    #             self.vm.write_call(f"{target}.{sub_name}", n_args)
 
     def _write_op_to_writer(self, op, writer):  # TODO: type checking
         ops = {

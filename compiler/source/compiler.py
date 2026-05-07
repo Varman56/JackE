@@ -9,20 +9,21 @@ from pathlib import Path
 from compiler.source.parser.parser import Parser
 from compiler.source.errors.parser_errors import ERR_PARSE_READING_FILE
 from compiler.source.grammar.slr import SLRParser
+from compiler.source.precompile.os_subs import OsSubroutines
 
 
 class Compiler:
     def __init__(
-        self,
-        path,
-        out_path="./build",
-        grammar_file="./compiler/source/grammar/grammar.slr",
-        states_file="./compiler/source/grammar/jack_slr_table.csv",
-        build_grammar=False,
-        print_errors=True,
-        pyout=print,
-        pin=input,
-        ignore_build_exist=False,
+            self,
+            path,
+            out_path="./build",
+            grammar_file="./compiler/source/grammar/grammar.slr",
+            states_file="./compiler/source/grammar/jack_slr_table.csv",
+            build_grammar=False,
+            print_errors=True,
+            pyout=print,
+            pin=input,
+            ignore_build_exist=False,
     ):
         self.print_errors = print_errors
         self.path = Path(path)
@@ -91,17 +92,32 @@ class Compiler:
             rmtree(self.out_path)
         self.out_path.mkdir(parents=True, exist_ok=True)
 
+    def precompile(self, subroutine_table, filename):
+        text = self.open_file(filename)
+        return self.parser.precompile(subroutine_table, text)
+
     def compile(self):
         self.prepare_build()
 
         files = self.get_files()
+        subroutine_table = OsSubroutines.get_table()
+        self.pyout(f"Reading {len(files)} files funcs...")
+        for file in files:
+            self.pyout(f"\n--- Processing {file} ---")
+            self.pyout(f"-- RESULT:  {self.precompile(subroutine_table, file)} ---")
+
+        self.pyout()
+        self.pyout(f"Resolved funcs: ", *subroutine_table.values(), sep="\n")
+        self.pyout(f"-" * 50)
+
+        self.pyout()
         self.pyout(f"Compiling {len(files)} files...")
         for file in files:
             self.pyout(f"\n--- Processing {file} ---")
 
             text = self.open_file(file)
 
-            success, commands = self.parser.parse(text)
+            success, commands = self.parser.parse(text, subroutine_table)
 
             if success:
                 self.save_vm_file(commands, file)

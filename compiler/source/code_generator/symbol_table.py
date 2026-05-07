@@ -18,6 +18,9 @@ class SymbolTable:
         self.subroutine_symbols = {}
         self.counts = {kind: 0 for kind in SymbolKind}
 
+    def contains(self, name: str) -> bool:
+        return name in self.subroutine_symbols or name in self.class_symbols
+
     def start_subroutine(self):
         """Очищает таблицу подпрограммы"""
         self.subroutine_symbols = {}
