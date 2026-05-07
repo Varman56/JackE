@@ -35,8 +35,8 @@ class CodeGenerator:
         if lhs == NTTitle.S:
             for arg in args:
                 if (
-                        isinstance(arg, NTwithCode)
-                        and arg.title == NTTitle.SubroutineDecList
+                    isinstance(arg, NTwithCode)
+                    and arg.title == NTTitle.SubroutineDecList
                 ):
                     self.vm.output = arg.vm.get_collected()
             return NonTerminal(NTTitle.S, self._get_start_token(args[0]), "S")
@@ -194,7 +194,7 @@ class CodeGenerator:
         # LetStatement -> 'let' VarName '=' Expression ';'
         # LetStatement -> 'let' VarName '[' Expression ']' '=' Expression ';'
         if (
-                lhs == NTTitle.LetStatement
+            lhs == NTTitle.LetStatement
         ):  # Expression already calculated and placed on stack
             writable = NTwithCode(NTTitle.LetStatement, self._get_start_token(args[0]))
             if len(args) == 5:  # let VarName = Expression ;
@@ -260,11 +260,13 @@ class CodeGenerator:
         # SubroutineCall -> ClassName '.' SubroutineName '(' ')'
         # SubroutineCall -> VarName '.' SubroutineName '(' ')'
         if (
-                lhs == NTTitle.SubroutineCall
+            lhs == NTTitle.SubroutineCall
         ):  # TODO: we need to understand, method/constructor/other func we have
-            writable = NTwithCode(NTTitle.SubroutineCall, self._get_start_token(args[0]))
+            writable = NTwithCode(
+                NTTitle.SubroutineCall, self._get_start_token(args[0])
+            )
 
-            if len(args) >= 2 and isinstance(args[1], Token) and args[1].val == '.':
+            if len(args) >= 2 and isinstance(args[1], Token) and args[1].val == ".":
                 prefix_node = args[0]  # NonTerminal (ClassName или VarName)
                 sub_name_node = args[2]  # NonTerminal SubroutineName
                 sub_name = sub_name_node.val
@@ -284,11 +286,17 @@ class CodeGenerator:
                         idx = self.symbols.index_of(prefix_node)
                         writable.vm.write_push(kind, idx)
 
-                        if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
+                        if (
+                            len(args) == 6
+                        ):  # VarName '.' SubroutineName '(' ExpressionList ')'
                             writable.extend(args[4].vm)
 
                         # Для метода передаём неявный this
-                        n_args = sig.nargs + 1 if sig.kind == SubroutineKind.method else sig.nargs
+                        n_args = (
+                            sig.nargs + 1
+                            if sig.kind == SubroutineKind.method
+                            else sig.nargs
+                        )
                         writable.vm.write_call(full_name, n_args)
                     else:
                         # Переменной нет – значит, это ClassName
@@ -521,7 +529,7 @@ class CodeGenerator:
                         writable.vm.write_push("constant", ord(ch))
                         writable.vm.write_call("String.appendChar", 2)
             elif (
-                    len(args) == 4
+                len(args) == 4
             ):  # TODO: Array implementation. Is current version  implemented correctly?
                 kind, index = self.symbols[args[0]]
                 writable.vm.write_push(kind, index)

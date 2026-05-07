@@ -2,7 +2,6 @@ import csv
 
 from compiler.source.errors.parser_errors import ERR_UNEXPECTED_STATE
 from compiler.source.code_generator.code_generator import CodeGenerator
-from compiler.source.code_generator.vm_writer import VMWriter
 from compiler.source.tokenizer.tokenizer import Tokenizer, TokenType, Token
 from compiler.source.grammar.grammar_reader import GrammarReader
 from compiler.source.precompile.subroutine import SubroutineKind, Subroutine
@@ -71,7 +70,7 @@ class Parser:
 
                 args = []
                 for _ in range(
-                        len(rule.right)
+                    len(rule.right)
                 ):  # TODO: check panic when value_stack/stack empty
                     stack.pop()
                     args.append(value_stack.pop())
@@ -105,26 +104,26 @@ class Parser:
 
         pos = 0
         # Ожидаем 'class' ClassName '{'
-        if tokens[pos].val != 'class':
+        if tokens[pos].val != "class":
             return False
         pos += 1
         if pos >= len(tokens):
             return False
         class_name = tokens[pos].val
         pos += 1
-        if tokens[pos].val != '{':
+        if tokens[pos].val != "{":
             return False
         pos += 1
 
         while pos < len(tokens):
             token = tokens[pos]
-            if token.val not in ('constructor', 'function', 'method'):
+            if token.val not in ("constructor", "function", "method"):
                 pos += 1
                 continue
             kind_str = token.val
-            if kind_str == 'constructor':
+            if kind_str == "constructor":
                 kind = SubroutineKind.constructor
-            elif kind_str == 'function':
+            elif kind_str == "function":
                 kind = SubroutineKind.function
             else:
                 kind = SubroutineKind.method
@@ -137,33 +136,37 @@ class Parser:
                 return False
             sub_name = tokens[pos].val
             pos += 1
-            if tokens[pos].val != '(':
+            if tokens[pos].val != "(":
                 return False
             pos += 1
 
             n_params = 0
             stacked = 1
-            if tokens[pos].val != ')':
+            if tokens[pos].val != ")":
                 n_params = 1
                 while stacked:
                     if pos >= len(tokens):
                         return False
-                    if tokens[pos].val == ',' and stacked == 1:
+                    if tokens[pos].val == "," and stacked == 1:
                         n_params += 1
-                    elif tokens[pos].val == '(':
+                    elif tokens[pos].val == "(":
                         stacked += 1
-                    elif tokens[pos].val == ')':
+                    elif tokens[pos].val == ")":
                         stacked -= 1
                     pos += 1
             pos += 1
             if pos >= len(tokens):
                 return False
-            sub = Subroutine(class_name=class_name, sub_name=sub_name, kind=kind, params_count=n_params,
-                             res_type=return_type)
+            sub = Subroutine(
+                class_name=class_name,
+                sub_name=sub_name,
+                kind=kind,
+                params_count=n_params,
+                res_type=return_type,
+            )
             table[sub.get_full_name()] = sub
 
         return True
-
 
     def parse(self, text, func_table):
         self.generator = CodeGenerator(func_table)

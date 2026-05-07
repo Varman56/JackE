@@ -88,7 +88,9 @@ class OsSubroutines:
             ("readInt", 1, "int"),
         ]
         for name, n_args, ret_type in kbd_funcs:
-            sub = Subroutine("Keyboard", name, SubroutineKind.function, n_args, ret_type)
+            sub = Subroutine(
+                "Keyboard", name, SubroutineKind.function, n_args, ret_type
+            )
             table[sub.get_full_name()] = sub
 
         # -------------------- Memory --------------------

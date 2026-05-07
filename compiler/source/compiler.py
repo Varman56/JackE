@@ -14,16 +14,16 @@ from compiler.source.precompile.os_subs import OsSubroutines
 
 class Compiler:
     def __init__(
-            self,
-            path,
-            out_path="./build",
-            grammar_file="./compiler/source/grammar/grammar.slr",
-            states_file="./compiler/source/grammar/jack_slr_table.csv",
-            build_grammar=False,
-            print_errors=True,
-            pyout=print,
-            pin=input,
-            ignore_build_exist=False,
+        self,
+        path,
+        out_path="./build",
+        grammar_file="./compiler/source/grammar/grammar.slr",
+        states_file="./compiler/source/grammar/jack_slr_table.csv",
+        build_grammar=False,
+        print_errors=True,
+        pyout=print,
+        pin=input,
+        ignore_build_exist=False,
     ):
         self.print_errors = print_errors
         self.path = Path(path)
@@ -107,8 +107,8 @@ class Compiler:
             self.pyout(f"-- RESULT:  {self.precompile(subroutine_table, file)} ---")
 
         self.pyout()
-        self.pyout(f"Resolved funcs: ", *subroutine_table.values(), sep="\n")
-        self.pyout(f"-" * 50)
+        self.pyout("Resolved funcs: ", *subroutine_table.values(), sep="\n")
+        self.pyout("-" * 50)
 
         self.pyout()
         self.pyout(f"Compiling {len(files)} files...")
