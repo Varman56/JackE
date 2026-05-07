@@ -53,7 +53,7 @@ _KEY_TO_CODE = {
 }
 
 
-def _get_key_code(key: keyboard.KeyCode | keyboard.Key) -> int:
+def _get_key_code(key: keyboard.KeyCode | keyboard.Key | None) -> int:
     if isinstance(key, keyboard.KeyCode) and key.vk and key.vk < 152:
         return key.vk
     if isinstance(key, keyboard.KeyCode):
@@ -137,13 +137,13 @@ class KeyboardLibrary:
         return vm_string_to_text(vm, handle)
     
     @staticmethod
-    def _on_press(key: keyboard.KeyCode | keyboard.Key) -> None:
+    def _on_press(key: keyboard.KeyCode | keyboard.Key | None) -> None:
         code = _get_key_code(key)
         with KeyboardLibrary._lock:
             KeyboardLibrary._current_key = code
     
     @staticmethod
-    def _on_release(key: keyboard.KeyCode | keyboard.Key) -> None:
+    def _on_release(key: keyboard.KeyCode | keyboard.Key | None) -> None:
         code = _get_key_code(key)
         with KeyboardLibrary._lock:
             if KeyboardLibrary._current_key == code:
