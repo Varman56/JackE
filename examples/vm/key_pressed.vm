@@ -1,0 +1,9 @@
+call Keyboard.init 0
+
+label loop
+
+call Keyboard.keyPressed 0
+call Output.printInt 1
+pop temp 0
+
+goto loop

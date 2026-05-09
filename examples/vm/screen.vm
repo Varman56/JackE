@@ -1,0 +1,11 @@
+call Screen.init 0
+
+push constant 0
+push constant 0
+push constant 255
+call Screen.setColorRGB 3
+
+push constant 100
+push constant 100
+push constant 25
+call Screen.drawCircle 3
