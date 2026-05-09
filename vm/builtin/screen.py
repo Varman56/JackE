@@ -37,7 +37,7 @@ class Command:
 @lru_cache(1)
 class ScreenWorker(Thread):
     def __init__(self) -> None:
-        super().__init__(daemon=True)
+        super().__init__()
 
         self.ready = Event()
         self.running = Event()
