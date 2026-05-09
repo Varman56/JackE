@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
 from threading import Thread, Event
@@ -30,8 +30,8 @@ class CommandType(Enum):
 @dataclass(frozen=True)
 class Command:
     command_type: CommandType
-    args : list[int] = []
-    answer_queue : Queue[int] = Queue(maxsize=1)
+    args : list[int] = field(default_factory=list)
+    answer_queue : Queue[int] = field(default_factory=Queue)
 
 
 @lru_cache(1)
@@ -93,7 +93,7 @@ class ScreenWorker(Thread):
         self.screen.fill(WHITE)
     
     def _set_color(self, r: int, g: int, b: int) -> None:
-        ScreenLibrary.color = (r, g, b)
+        self.color = (r, g, b)
     
     def _draw_pixel(self, x: int, y: int) -> None:
         self.screen.set_at((x, y), self.color)
