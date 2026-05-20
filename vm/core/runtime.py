@@ -60,6 +60,9 @@ class VirtualMachine:
         program._current_instruction_index = 0
 
         while program._current_instruction_index < len(program.instructions):
+            if ScreenLibrary.is_screen_closed():
+                break
+
             instruction = program.get_current_instruction()
 
             if instruction.source_file:

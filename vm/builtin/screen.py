@@ -66,13 +66,13 @@ class ScreenWorker(Thread):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running.clear()
-                self.process_commands()
+                self._process_commands()
                 pygame.display.update()
                 self.clock.tick(FPS)
         
         pygame.quit()
     
-    def process_commands(self) -> None:
+    def _process_commands(self) -> None:
         while not self.commands.empty():
             command = self.commands.get()
             match command.command_type:
@@ -88,6 +88,9 @@ class ScreenWorker(Thread):
                     self._draw_rectangle(*command.args)
                 case CommandType.DRAW_CIRCLE:
                     self._draw_circle(*command.args)
+
+    def close_screen(self) -> None:
+        self.running.clear()
 
     def _clear_screen(self) -> None:
         self.screen.fill(WHITE)
@@ -152,6 +155,16 @@ class ScreenLibrary:
         ScreenLibrary.worker.start()
         ScreenLibrary.worker.ready.wait()
         return 0
+    
+    @staticmethod
+    def close_screen() -> None:
+        ScreenLibrary.worker.close_screen()
+        ScreenLibrary.worker.join()
+
+    @staticmethod
+    def is_screen_closed() -> bool:
+        return (ScreenLibrary.worker.ready.is_set() 
+                and not ScreenLibrary.worker.running.is_set())
     
     @staticmethod
     def _clear_screen(args: list[int], vm: VirtualMachine) -> int:
