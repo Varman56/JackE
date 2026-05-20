@@ -21,23 +21,19 @@ _KEY_TO_CODE = {
     ",": 44,
     ".": 46,
     "/": 47,
-
     "enter": 128,
     "backspace": 129,
-
     "left": 130,
     "up": 131,
     "right": 132,
     "down": 133,
-
     "home": 134,
     "end": 135,
     "page_up": 136,
     "page_down": 137,
-    "insert" : 138,
-    "delete" : 139,
-    "esc" : 140,
-
+    "insert": 138,
+    "delete": 139,
+    "esc": 140,
     "f1": 141,
     "f2": 142,
     "f3": 143,
@@ -61,7 +57,7 @@ def _get_key_code(key: keyboard.KeyCode | keyboard.Key | None) -> int:
     if isinstance(key, keyboard.Key):
         return _KEY_TO_CODE.get(key.name, 0)
     return 0
-    
+
 
 class KeyboardLibrary:
     name = "Keyboard"
@@ -80,8 +76,7 @@ class KeyboardLibrary:
     @staticmethod
     def _init(args: list[int], vm: VirtualMachine) -> int:
         listener = keyboard.Listener(
-            on_press=KeyboardLibrary._on_press,
-            on_release=KeyboardLibrary._on_release
+            on_press=KeyboardLibrary._on_press, on_release=KeyboardLibrary._on_release
         )
         listener.daemon = True
         listener.start()
@@ -135,13 +130,13 @@ class KeyboardLibrary:
         if handle == 0:
             return ""
         return vm_string_to_text(vm, handle)
-    
+
     @staticmethod
     def _on_press(key: keyboard.KeyCode | keyboard.Key | None) -> None:
         code = _get_key_code(key)
         with KeyboardLibrary._lock:
             KeyboardLibrary._current_key = code
-    
+
     @staticmethod
     def _on_release(key: keyboard.KeyCode | keyboard.Key | None) -> None:
         code = _get_key_code(key)

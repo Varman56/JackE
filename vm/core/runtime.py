@@ -3,7 +3,6 @@ Hack Virtual Machine Runtime
 Эмулятор виртуальной машины из курса Nand to Tetris
 """
 
-
 from vm.core.instruction import Function, Label
 from vm.core.program import Program
 from vm.core.memory import VMMemory
