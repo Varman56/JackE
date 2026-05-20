@@ -4,6 +4,7 @@ Jack Compiler
 """
 
 from pathlib import Path
+from shutil import rmtree
 
 from compiler.source.parser.parser import Parser
 from compiler.source.errors.parser_errors import ERR_PARSE_READING_FILE
@@ -80,11 +81,11 @@ class Compiler:
         if self.out_path.exists():
             if not self.ignore_build_exist:
                 ans = self.pin(
-                    "build директория уже существует. Функции могут быть переопределены неверно. Введите 'y' для подтверждения: "
+                    "build директория уже существует. Она будет очищена. Введите 'y' для подтверждения: "
                 )
                 if ans != "y":
                     raise KeyboardInterrupt
-            # rmtree(self.out_path)
+            rmtree(self.out_path)
         self.out_path.mkdir(parents=True, exist_ok=True)
 
     def precompile(self, subroutine_table, filename):

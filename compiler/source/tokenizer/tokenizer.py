@@ -126,7 +126,7 @@ class Tokenizer:
                 self.parse_index == len(self.text)
                 and self.text[self.parse_index - 1] != '"'
             ):
-                raise ERR_TOKEN_STRING_CONSTANT_NOT_CLOSED  # TODO: test+check
+                raise ERR_TOKEN_STRING_CONSTANT_NOT_CLOSED
             self.parse_index += 1
             self.tokens.append(
                 Token(TokenType.stringConstant, "".join(sb), self.cur_row, self.cur_col)
@@ -149,7 +149,7 @@ class Tokenizer:
             num_str = "".join(sb)
             try:
                 result = int(num_str)
-                if result <= 32767:  # TODO: for JackE should be large
+                if result <= 32767: # can be improved with our vm
                     self.tokens.append(
                         Token(
                             TokenType.integerConstant,
@@ -183,7 +183,7 @@ class Tokenizer:
                     break
                 cur_symb = self.text[self.parse_index]
             s = "".join(sb)
-            if s.lower() in self.keywords:
+            if s in self.keywords:
                 self.tokens.append(
                     Token(TokenType.keyword, s, self.cur_row, self.cur_col)
                 )

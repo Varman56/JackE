@@ -323,10 +323,6 @@ class CodeGenerator:
                 if sig is None:
                     raise ErrUnknownFunc(full_name)
 
-            if sig.kind == SubroutineKind.method:
-                writable.vm.write_pop("pointer", 0)
-                writable.vm.write_push("pointer", 0)
-
             if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
                 writable.extend(args[4].vm)
 

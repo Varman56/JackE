@@ -11,7 +11,7 @@ class Parser:
     def __init__(self, grammar_file, states_file, pout=print):
         self.reader = GrammarReader(
             grammar_file
-        )  # TODO: Generate one grammar.slr file, without using reader here
+        )
         self.rules = self.reader.rules
         self.action_table = {}
         self.goto_table = {}
