@@ -9,9 +9,7 @@ from compiler.source.precompile.subroutine import SubroutineKind, Subroutine
 
 class Parser:
     def __init__(self, grammar_file, states_file, pout=print):
-        self.reader = GrammarReader(
-            grammar_file
-        )
+        self.reader = GrammarReader(grammar_file)
         self.rules = self.reader.rules
         self.action_table = {}
         self.goto_table = {}
@@ -41,7 +39,7 @@ class Parser:
         return token.token_type.name
 
     def run_parser(self, tokens):
-        tokens.append(Token(None, "$"))  # TODO: replace with TokenType.END
+        tokens.append(Token(TokenType.EOF, "EOF"))
         stack = [0]
         value_stack = []
 
@@ -49,15 +47,13 @@ class Parser:
         while True:
             state = stack[-1]
             token = tokens[i]
-            lookahead = (
-                self._get_lookahead(token) if token.token_type else "$"
-            )  # TODO: check problem of string "$" in .jack code
+            lookahead = self._get_lookahead(token)
 
             action = self.action_table.get((state, lookahead))
             if not action:
                 self.pout(
                     f"Syntax Error at row {token.row}, col {token.col}: Unexpected token '{token.val}'"
-                )  # TODO: check panic with None TokenType in "$"
+                )
                 return False
 
             if action.startswith("S"):
@@ -77,15 +73,16 @@ class Parser:
                 rule = self.rules[rule_idx]
 
                 args = []
-                for _ in range(
-                        len(rule.right)
-                ):  # TODO: check panic when value_stack/stack empty
+                for _ in range(len(rule.right)):
                     stack.pop()
                     args.append(value_stack.pop())
                 args.reverse()
 
-                result = self.generator.generate(rule, args)
-
+                try:
+                    result = self.generator.generate(rule, args)
+                except Exception as e:
+                    self.pout(f"ERROR: {e}\n\nAborting...")
+                    return False
                 state_before = stack[-1]
                 goto_state = self.goto_table.get((state_before, rule.left))
                 stack.append(goto_state)
@@ -181,5 +178,5 @@ class Parser:
         return (
             res,
             self.generator.vm.get_collected(),
-        self.generator.class_name,
-        )  # TODO: check generator's vm
+            self.generator.class_name,
+        )

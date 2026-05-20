@@ -149,7 +149,7 @@ class Tokenizer:
             num_str = "".join(sb)
             try:
                 result = int(num_str)
-                if result <= 32767: # can be improved with our vm
+                if result <= 32767:  # can be improved with our vm
                     self.tokens.append(
                         Token(
                             TokenType.integerConstant,

@@ -18,7 +18,7 @@ class SLRParser:
             for item in state:
                 if item.next_symbol is None:
                     if item.rule.left == self.reader.rules[0].left:
-                        self.set_action(i, "$", "ACC")
+                        self.set_action(i, "EOF", "ACC")
                     else:
                         follow_set = self.automata.follow.get(item.rule.left, set())
                         for terminal in follow_set:

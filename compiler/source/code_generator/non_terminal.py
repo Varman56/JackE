@@ -42,21 +42,6 @@ class NTwithVarList(NonTerminal):
         return self.var_type
 
 
-# class NTwithExpression(NonTerminal):
-#     def __init__(self, title, start_token, res_type: VarTypes, val="", **kwargs):
-#         super().__init__(title, start_token, val, **kwargs)
-#         self.res_type = res_type
-#
-#     def get_type(self):
-#         return self.res_type
-#
-#     def check_bin_op_ability(self, bin_op, other):  # TODO: type checking
-#         pass
-#
-#     def check_un_op(self, un_op):
-#         pass
-
-
 class NTwithCode(NonTerminal):
     def __init__(self, title, start_token, **kwargs):
         super().__init__(title, start_token, **kwargs)

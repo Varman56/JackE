@@ -38,7 +38,7 @@ class Automata:
                     changed = True
 
     def build_follow(self):
-        self.follow[self.start_symbol].add("$")
+        self.follow[self.start_symbol].add("EOF")
 
         changed = True
         while changed:

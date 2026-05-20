@@ -37,4 +37,4 @@ class GrammarReader:
                 if symbol not in self.non_terminals:
                     self.terminals.add(symbol)
 
-        self.terminals.add("$")  # TODO: check should we do this
+        self.terminals.add("EOF")

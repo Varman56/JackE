@@ -199,7 +199,7 @@ class CodeGenerator:
     # SubroutineDec -> 'constructor' ClassName SubroutineName ParameterList SubroutineBody
     # SubroutineDec -> 'function' ReturnType SubroutineName ParameterList SubroutineBody
     # SubroutineDec -> 'method' ReturnType SubroutineName ParameterList SubroutineBody
-    def handle_subroutine_dec(self, args):  # TODO: check
+    def handle_subroutine_dec(self, args):
         writable = NTwithCode(NTTitle.SubroutineDec, self._get_start_token(args[0]))
         s_kind = args[0].val
         # ret_type = args[1].val # TODO: type checking
@@ -241,7 +241,7 @@ class CodeGenerator:
             writable.extend(args[6].vm)
             writable.vm.write_push("temp", 0)
             writable.vm.write_pop("pointer", 1)
-            writable.vm.write_pop("that", 0)  # TODO: check array using
+            writable.vm.write_pop("that", 0)
         return writable
 
     # ReturnStatement -> 'return' ';'
@@ -491,9 +491,7 @@ class CodeGenerator:
                     writable.vm.write_call("String.appendChar", 2)
             elif len(args) == 3:
                 writable.extend(args[1].vm)
-        elif (
-            len(args) == 4
-        ):  # TODO: Array implementation. Is current version  implemented correctly?
+        elif len(args) == 4:
             var, ok = self.symbols[args[0]]
             if not ok:
                 raise ErrUnknownSymbol(*args[0].start_token.get_pos())
@@ -507,7 +505,10 @@ class CodeGenerator:
             if not ok:
                 raise ErrUnknownSymbol(*args[0].start_token.get_pos())
             writable.vm.write_push(var.kind, var.index)
-        elif args[0].title == NTTitle.SubroutineCall or args[0].title == NTTitle.KeywordConstant:
+        elif (
+            args[0].title == NTTitle.SubroutineCall
+            or args[0].title == NTTitle.KeywordConstant
+        ):
             writable.extend(args[0].vm)
         return writable
 
