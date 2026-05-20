@@ -3,7 +3,6 @@ Jack Compiler
 Компилятор кода Jack из курса Nand to Tetris
 """
 
-from shutil import rmtree
 from pathlib import Path
 
 from compiler.source.parser.parser import Parser
@@ -71,25 +70,21 @@ class Compiler:
                 raise ERR_PARSE_READING_FILE
         return text
 
-    def save_vm_file(self, vm_commands, jack_file_path):
-        vm_file_path = (
-            str(jack_file_path)
-            .replace(".jack", ".vm")
-            .replace("\\", "_")
-            .replace("/", "_")
-        )
-        with open(f"{self.out_path}\\{vm_file_path}", "w", encoding="utf-8") as f:
+    def save_vm_file(self, vm_commands, class_name):
+        out_path = f"{self.out_path}\\{class_name}.vm"
+        with open(out_path, "w", encoding="utf-8") as f:
             f.write("\n".join(vm_commands) + "\n")
+        return out_path
 
     def prepare_build(self):
         if self.out_path.exists():
             if not self.ignore_build_exist:
                 ans = self.pin(
-                    "build дериктория будет очищена? введите 'y' для подтверждения: "
+                    "build директория уже существует. Функции могут быть переопределены неверно. Введите 'y' для подтверждения: "
                 )
                 if ans != "y":
                     raise KeyboardInterrupt
-            rmtree(self.out_path)
+            # rmtree(self.out_path)
         self.out_path.mkdir(parents=True, exist_ok=True)
 
     def precompile(self, subroutine_table, filename):
@@ -100,27 +95,37 @@ class Compiler:
         self.prepare_build()
 
         files = self.get_files()
-        subroutine_table = OsSubroutines.get_table()
+        subroutine_table = {}
         self.pyout(f"Reading {len(files)} files funcs...")
         for file in files:
             self.pyout(f"\n--- Processing {file} ---")
-            self.pyout(f"-- RESULT:  {self.precompile(subroutine_table, file)} ---")
+            self.pyout(
+                f"-- Functions correctly found:  {self.precompile(subroutine_table, file)} ---"
+            )
 
         self.pyout()
         self.pyout("Resolved funcs: ", *subroutine_table.values(), sep="\n")
+        self.pyout("And default libraries")
         self.pyout("-" * 50)
+
+        subroutine_table = OsSubroutines.get_table() | subroutine_table
 
         self.pyout()
         self.pyout(f"Compiling {len(files)} files...")
+
+        success_files = []
+
         for file in files:
-            self.pyout(f"\n--- Processing {file} ---")
+            self.pyout(f"\n--- Processing: {file} ---")
 
             text = self.open_file(file)
 
-            success, commands = self.parser.parse(text, subroutine_table)
+            success, commands, class_name = self.parser.parse(text, subroutine_table)
 
+            res = "FAILED"
             if success:
-                self.save_vm_file(commands, file)
-                self.pyout(f"--- File {file}:  SUCCESS ---")
-            else:
-                self.pyout(f"--- File {file}: FAILED ---")
+                res = "SUCCESS"
+                success_files.append(self.save_vm_file(commands, class_name))
+            self.pyout(f"--- RESULT STATUS:  {res} ---")
+
+        return success_files

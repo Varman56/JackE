@@ -15,6 +15,7 @@ class OsSubroutines:
             ("min", SubroutineKind.function, 2, "int"),
             ("max", SubroutineKind.function, 2, "int"),
             ("sqrt", SubroutineKind.function, 1, "int"),
+            # ("abs", SubroutineKind.function, 1, "int"),
         ]
         for name, kind, n_args, ret_type in math_funcs:
             sub = Subroutine("Math", name, kind, n_args, ret_type)
@@ -109,6 +110,7 @@ class OsSubroutines:
             ("halt", 0, "void"),
             ("error", 1, "void"),
             ("wait", 1, "void"),
+            # ("exit", 0, "void"),
         ]
         for name, n_args, ret_type in sys_funcs:
             sub = Subroutine("Sys", name, SubroutineKind.function, n_args, ret_type)

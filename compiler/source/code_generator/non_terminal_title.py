@@ -24,7 +24,6 @@ class NTTitle(StrEnum):
     IfHeader = "IfHeader"
     ElsePart = "ElsePart"
     WhileHeader = "WhileHeader"
-    WhileCondition = "WhileCondition"
     WhileStatement = "WhileStatement"
     DoStatement = "DoStatement"
     ReturnStatement = "ReturnStatement"
@@ -36,3 +35,4 @@ class NTTitle(StrEnum):
     KeywordConstant = "KeywordConstant"
     UnaryOperation = "UnaryOperation"
     Operation = "Operation"
+    ReturnType = "ReturnType"

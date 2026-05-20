@@ -5,5 +5,5 @@ class VarTypes(StrEnum):
     int = "int"
     char = "char"
     boolean = "boolean"
-    className = "ClasName"
+    className = "ClassName"
     unknown = "unknown"

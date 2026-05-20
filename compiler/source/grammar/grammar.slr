@@ -1,4 +1,4 @@
-S` -> S
+S' -> S
 
 S -> 'class' ClassName '{' ClassVarDecList SubroutineDecList '}'
 S -> 'class' ClassName '{' ClassVarDecList '}'
@@ -26,12 +26,12 @@ VarName -> identifier
 
 ClassName -> identifier
 
-SubroutineDec -> 'constructor' 'void' SubroutineName ParameterList SubroutineBody
-SubroutineDec -> 'constructor' Type SubroutineName ParameterList SubroutineBody
-SubroutineDec -> 'function' 'void' SubroutineName ParameterList SubroutineBody
-SubroutineDec -> 'function' Type SubroutineName ParameterList SubroutineBody
-SubroutineDec -> 'method' 'void' SubroutineName ParameterList SubroutineBody
-SubroutineDec -> 'method' Type SubroutineName ParameterList SubroutineBody
+SubroutineDec -> 'constructor' ClassName SubroutineName ParameterList SubroutineBody
+SubroutineDec -> 'function' ReturnType SubroutineName ParameterList SubroutineBody
+SubroutineDec -> 'method' ReturnType SubroutineName ParameterList SubroutineBody
+
+ReturnType -> Type
+ReturnType -> 'void'
 
 SubroutineName -> identifier
 
@@ -73,12 +73,10 @@ IfHeader -> 'if' '(' Expression ')'
 ElsePart -> 'else' '{' StatementsList '}'
 ElsePart -> 'else' '{' '}'
 
-WhileHeader -> 'while'
+WhileHeader -> 'while' '(' Expression ')'
 
-WhileCondition -> WhileHeader '(' Expression ')'
-
-WhileStatement -> WhileCondition '{' StatementsList '}'
-WhileStatement -> WhileCondition '{' '}'
+WhileStatement -> WhileHeader '{' StatementsList '}'
+WhileStatement -> WhileHeader '{' '}'
 
 DoStatement -> 'do' SubroutineCall ';'
 
@@ -102,10 +100,8 @@ Term -> '(' Expression ')'
 Term -> SubroutineCall
 
 SubroutineCall -> SubroutineName '(' ExpressionList ')'
-SubroutineCall -> ClassName '.' SubroutineName '(' ExpressionList ')'
 SubroutineCall -> VarName '.' SubroutineName '(' ExpressionList ')'
 SubroutineCall -> SubroutineName '(' ')'
-SubroutineCall -> ClassName '.' SubroutineName '(' ')'
 SubroutineCall -> VarName '.' SubroutineName '(' ')'
 
 ExpressionList -> Expression

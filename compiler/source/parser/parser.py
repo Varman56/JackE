@@ -18,6 +18,7 @@ class Parser:
         self._load_table(states_file)
         self.generator = None
         self.pout = pout
+        self.label_index = 0
 
     def _load_table(self, path):
         with open(path, "r", encoding="utf-8") as f:
@@ -63,6 +64,13 @@ class Parser:
                 next_state = int(action[1:])
                 stack.append(next_state)
                 value_stack.append(token)
+                if len(value_stack) >= 2:
+                    if value_stack[-2].val == "method":
+                        self.generator.current_kind = "method"
+                    elif value_stack[-2].val == "constructor":
+                        self.generator.current_kind = "constructor"
+                    elif value_stack[-2].val == "function":
+                        self.generator.current_kind = "function"
                 i += 1
             elif action.startswith("R"):
                 rule_idx = int(action[1:])
@@ -70,15 +78,13 @@ class Parser:
 
                 args = []
                 for _ in range(
-                    len(rule.right)
+                        len(rule.right)
                 ):  # TODO: check panic when value_stack/stack empty
                     stack.pop()
                     args.append(value_stack.pop())
                 args.reverse()
 
-                result = self.generator.generate(
-                    rule, args
-                )  # return string, list, None!!!
+                result = self.generator.generate(rule, args)
 
                 state_before = stack[-1]
                 goto_state = self.goto_table.get((state_before, rule.left))
@@ -169,7 +175,11 @@ class Parser:
         return True
 
     def parse(self, text, func_table):
-        self.generator = CodeGenerator(func_table)
-        return self.tokenize_and_parse(
-            text
-        ), self.generator.vm.get_collected()  # TODO: check generator's vm
+        self.generator = CodeGenerator(func_table, self.label_index)
+        res = self.tokenize_and_parse(text)
+        self.label_index = self.generator.label_idx
+        return (
+            res,
+            self.generator.vm.get_collected(),
+        self.generator.class_name,
+        )  # TODO: check generator's vm

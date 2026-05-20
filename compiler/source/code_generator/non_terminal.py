@@ -14,9 +14,6 @@ class NonTerminal:
     def __repr__(self):
         return f"{self.title} ({self.start_token.row} {self.start_token.col})"
 
-    def get_val(self):
-        return self.val
-
     def get_kwargs(self):
         return self.kwargs
 
