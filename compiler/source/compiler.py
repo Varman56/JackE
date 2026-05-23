@@ -22,8 +22,6 @@ class Compiler:
     - states_file: Путь до slr таблицы (подразумевается файл анализатора jack, она автоматически собирается из грамматики)
     - build_grammar: Пересобрать ли таблицу slr-анализатора из grammar_file в states_file
     - ignore_build_exist: Игнорировать ли предупреждение о перезаписи и удалении всей build папки (Применяйте с осторожностью)
-    - pyout: Функция вывода данных, интефрейс должен совпадать с print
-    - pin:  Функция ввода данных, интефрейс должен совпадать с input
     """
 
     def __init__(
@@ -34,13 +32,9 @@ class Compiler:
         states_file="./compiler/source/grammar/jack_slr_table.csv",
         build_grammar=False,
         ignore_build_exist=False,
-        pyout=print,
-        pin=input,
     ):
         self.path = Path(path)
         self.out_path = Path(out_path)
-        self.pyout = pyout
-        self.pin = pin
         self.grammar_file = grammar_file
         self.states_file = states_file
         self.ignore_build_exist = ignore_build_exist
@@ -50,15 +44,15 @@ class Compiler:
 
     def try_build_grammar(self):
         """Построение грамматики (таблицы slr анализатора)"""
-        self.pyout("Building grammar...")
+        print("Building grammar...")
         slr = SLRParser(filename=self.grammar_file, outfile=self.states_file)
         if slr.errors:
-            self.pyout(
+            print(
                 f"Обнаружено конфликтов: {len(slr.errors)}. Грамматика может быть не SLR(1)."
             )
         for err in slr.errors:
-            self.pyout(err)
-        self.pyout("Building complete!\n")
+            print(err)
+        print("Building complete!\n")
 
     def walkdir(self):
         """Рекурсивный поиск всех .jack файлов в директории"""
@@ -81,7 +75,7 @@ class Compiler:
             try:
                 text = f.read()
             except Exception as e:
-                self.pyout("Error during read file: ", e)
+                print("Error during read file: ", e)
                 return ""
         return text
 
@@ -96,7 +90,7 @@ class Compiler:
         """Очистка директрии сохранения .vm файлов"""
         if self.out_path.exists():
             if not self.ignore_build_exist:
-                ans = self.pin(
+                ans = input(
                     "build директория уже существует. Повторяющиеся классы будут перезаписаны.\nЕсли вывод компилятора - стандартная папка ('./build') - она будет очищена.\nВведите 'y' для подтверждения: "
                 )
                 if ans != "y":
@@ -116,27 +110,27 @@ class Compiler:
 
         files = self.get_files()
         subroutine_table = {}
-        self.pyout(f"Reading {len(files)} files funcs...")
+        print(f"Reading {len(files)} files funcs...")
         for file in files:
-            self.pyout(f"\n--- Processing {file} ---")
-            self.pyout(
+            print(f"\n--- Processing {file} ---")
+            print(
                 f"-- Functions correctly found:  {self.precompile(subroutine_table, file)} ---"
             )
 
-        self.pyout()
-        self.pyout("Resolved funcs: ", *subroutine_table.values(), sep="\n")
-        self.pyout("And default libraries")
-        self.pyout("-" * 50)
+        print()
+        print("Resolved funcs: ", *subroutine_table.values(), sep="\n")
+        print("And default libraries")
+        print("-" * 50)
 
         subroutine_table = OsSubroutines.get_table() | subroutine_table
 
-        self.pyout()
-        self.pyout(f"Compiling {len(files)} files...")
+        print()
+        print(f"Compiling {len(files)} files...")
 
         success_files = []
 
         for file in files:
-            self.pyout(f"\n--- Processing: {file} ---")
+            print(f"\n--- Processing: {file} ---")
 
             text = self.open_file(file)
 
@@ -146,6 +140,6 @@ class Compiler:
             if success:
                 res = "SUCCESS"
                 success_files.append(self.save_vm_file(commands, class_name))
-            self.pyout(f"--- RESULT STATUS:  {res} ---")
+            print(f"--- RESULT STATUS:  {res} ---")
 
         return success_files

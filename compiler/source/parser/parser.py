@@ -14,17 +14,15 @@ class Parser:
     Аргументы:
     - grammar_file: Путь до файла грамматики
     - states_file: Путь  до файла таблицы slr анализатора
-    - pout: Функция для вывода ошибок, интерфейс должен повторять print
     """
 
-    def __init__(self, grammar_file, states_file, pout=print):
+    def __init__(self, grammar_file, states_file):
         self.reader = GrammarReader(grammar_file)
         self.rules = self.reader.rules
         self.action_table = {}
         self.goto_table = {}
         self._load_table(states_file)
         self.generator = None
-        self.pout = pout
         self.label_index = 0
 
     def _load_table(self, path):
@@ -63,7 +61,7 @@ class Parser:
 
             action = self.action_table.get((state, lookahead))
             if not action:
-                self.pout(
+                print(
                     f"Syntax Error at row {token.row}, col {token.col}: Unexpected token '{token.val}'"
                 )
                 return False
@@ -93,7 +91,7 @@ class Parser:
                 try:
                     result = self.generator.generate(rule, args)
                 except Exception as e:
-                    self.pout(f"ERROR: {e}\n\nAborting...")
+                    print(f"ERROR: {e}\n\nAborting...")
                     return False
                 state_before = stack[-1]
                 goto_state = self.goto_table.get((state_before, rule.left))
