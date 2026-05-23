@@ -1,4 +1,6 @@
 class Item:
+    """Класс для пункта грамматики. Хрнаит правило и позицию маркера"""
+
     def __init__(self, rule, dot_pos):
         self.rule = rule
         self.dot_pos = dot_pos

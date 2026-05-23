@@ -5,6 +5,14 @@ from compiler.source.tokenizer.token import Token
 
 
 class NonTerminal:
+    """Класс нетерминала, хрнаит дополнительную информацию
+
+     Аргументы:
+    - title: NTTitle - заголовок нетерминала
+    - start_token: Токен с которого начинается нетерминал, нужен для вывода ошибки
+    - val: Значение, которое хранит в себе нетерминал
+    - kwargs: Дополнительные аргументы"""
+
     def __init__(self, title: NTTitle, start_token: Token, val="", **kwargs):
         self.title = title
         self.start_token = start_token
@@ -19,6 +27,8 @@ class NonTerminal:
 
 
 class NTwithTypedVarList(NonTerminal):  # (type name, type name, ...)
+    """Нетерминал с дополнительной информацией в виде списка переменных, где кадждая с определённым типом"""
+
     def __init__(self, title, start_token, val="", typed_var_list=[], **kwargs):
         super().__init__(title, start_token, val, **kwargs)
         self.typed_var_list = typed_var_list
@@ -28,6 +38,8 @@ class NTwithTypedVarList(NonTerminal):  # (type name, type name, ...)
 
 
 class NTwithVarList(NonTerminal):
+    """Нетерминал с дополнительной информацией в виде списка переменных одного типа"""
+
     def __init__(
         self, title, start_token, var_type: VarTypes, val="", var_list=[], **kwargs
     ):
@@ -43,6 +55,8 @@ class NTwithVarList(NonTerminal):
 
 
 class NTwithCode(NonTerminal):
+    """Нетерминал который сохраняет команды виртуальной машины"""
+
     def __init__(self, title, start_token, **kwargs):
         super().__init__(title, start_token, **kwargs)
         self.vm = VMWriter()

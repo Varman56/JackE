@@ -3,6 +3,8 @@ from compiler.source.precompile.subroutine import Subroutine  # ваш клас�
 
 
 class OsSubroutines:
+    """Класс для инициализации функций операционной системы"""
+
     @staticmethod
     def get_table():
         table = {}

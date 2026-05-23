@@ -1,4 +1,6 @@
 class Rule:
+    """Класс для правил грамматики. Хранит левую и правую часть правишла, и его id"""
+
     def __init__(self, left, right, rule_id):
         self.left = left
         self.right = right

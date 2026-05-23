@@ -4,6 +4,12 @@ from compiler.source.grammar.automata import Automata
 
 
 class SLRParser:
+    """Класс для построения таблицы slr анализатора
+
+     Аргументы:
+    - filename: Путь до файла грамматики
+    - outfile: Путь  куда будет сохранена таблица slr анализатора"""
+
     def __init__(self, filename="grammar.slr", outfile="jack_slr_table.csv"):
         self.automata = Automata(filename)
         self.reader = self.automata.reader
@@ -14,6 +20,7 @@ class SLRParser:
         self.save_table_to_csv(outfile)
 
     def build_tables(self):
+        """Построение таблицы slr анализатора"""
         for i, state in enumerate(self.automata.states):
             for item in state:
                 if item.next_symbol is None:
@@ -35,6 +42,7 @@ class SLRParser:
                             self.goto_table[(i, symbol)] = next_idx
 
     def log_conflict(self, state_idx, terminal, existing_action, new_action):
+        """Формаирование информации о конфликте в таблицу"""
         state = self.automata.states[state_idx]
         lines = list()
         lines.append(
@@ -75,6 +83,7 @@ class SLRParser:
         return "\n".join(lines)
 
     def set_action(self, state_idx, terminal, action):
+        """Сохранение действия по таблице"""
         current = self.action_table.get((state_idx, terminal))
         if current and current != action:
             conflict_msg = self.log_conflict(state_idx, terminal, current, action)
@@ -84,6 +93,7 @@ class SLRParser:
         self.action_table[(state_idx, terminal)] = action
 
     def save_table_to_csv(self, filename):
+        """Сохранить таблицу в csv"""
         terminals = sorted(list(self.reader.terminals))
         non_terminals = sorted(
             list(self.reader.non_terminals - {self.reader.rules[0].left})

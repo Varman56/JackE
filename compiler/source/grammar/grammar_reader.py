@@ -2,6 +2,11 @@ from compiler.source.grammar.rule import Rule
 
 
 class GrammarReader:
+    """Класс для чтения файла грамматики и сохранения информации о ней
+
+     Аргументы:
+    - filename: Путь до файла грамматики"""
+
     def __init__(self, filename):
         self.filename = filename
         self.rules = []
@@ -10,6 +15,7 @@ class GrammarReader:
         self.read()
 
     def read(self):
+        """Чтение файла файла грамматики"""
         rule_counter = 0
         with open(self.filename, "r", encoding="utf-8") as f:
             for line in f:

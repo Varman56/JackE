@@ -2,6 +2,8 @@ from compiler.source.tokenizer.token_type import TokenType
 
 
 class Token:
+    """Единичный объект необработанного .jack файла. Терминал с точки зрения грамматики"""
+
     def __init__(self, token_type: TokenType, value, row=0, col=0):
         self.token_type = token_type
         self.val = value

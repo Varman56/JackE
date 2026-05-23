@@ -11,6 +11,12 @@ from compiler.source.errors.tokenizer_errors import (
 
 
 class Tokenizer:
+    """Класс для токенизации .jack файла
+
+     Аргументы:
+    - text: Текст .jack файла
+    """
+
     def __init__(self, text):
         self.text = text
         self.parse_index = 0
@@ -45,10 +51,12 @@ class Tokenizer:
         self.symbols = set("{}()[].,;+-*/&|<>=~")
 
     def tokenize(self):
+        """Попытка токенизации текста файла и вовзрат токенов"""
         self.parse_code()
-        return self.tokens
+        return self.get_tokens()
 
     def trim_left(self):
+        """Очистка комментариев, пробельных символов, переводов строки до следующего токена"""
         while self.parse_index < len(self.text):
             cur_symb = self.text[self.parse_index]
             if cur_symb == "\n":  # \n ignored
@@ -77,6 +85,7 @@ class Tokenizer:
                 break
 
     def skip_until_s(self, substr):
+        """Пропуск любых символов, пока не встретим строку substr"""
         while self.text[self.parse_index : self.parse_index + len(substr)] != substr:
             self.cur_col += 1
             if self.text[self.parse_index] == "\n":
@@ -88,6 +97,7 @@ class Tokenizer:
         return True
 
     def parse_code(self):
+        """Попытка токенизации. Двигаемся до следующего токена, пытаемся определить его тип"""
         while self.parse_index < len(self.text):
             self.trim_left()
             if self.parse_index < len(self.text):
@@ -101,6 +111,7 @@ class Tokenizer:
                     raise ERR_TOKEN_UNKNOWN
 
     def parse_symbol(self):
+        """Попытка токенизации символа"""
         cur_symb = self.text[self.parse_index]
         if cur_symb in self.symbols:
             self.tokens.append(
@@ -112,6 +123,7 @@ class Tokenizer:
         return False
 
     def parse_string_constant(self):
+        """Попытка токенизации строк"""
         if self.text[self.parse_index] == '"':
             sb = []
             self.parse_index += 1
@@ -136,6 +148,7 @@ class Tokenizer:
         return False
 
     def parse_integer_constant(self):
+        """Попытка токенизации целочисленных констант"""
         if self.text[self.parse_index].isdigit():
             sb = list()
             sb.append(self.text[self.parse_index])
@@ -167,6 +180,7 @@ class Tokenizer:
         return False
 
     def parse_identifier_and_keywords(self):
+        """Попытка токенизации переменных и ключевых слов"""
         cur_symb = self.text[self.parse_index]
         if (cur_symb.isalpha() and "A" <= cur_symb <= "z") or cur_symb == "_":
             sb = []
@@ -197,6 +211,3 @@ class Tokenizer:
 
     def get_tokens(self):
         return self.tokens.copy()
-
-    def __str__(self):
-        return self.text[self.parse_index :]

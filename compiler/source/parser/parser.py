@@ -8,6 +8,15 @@ from compiler.source.precompile.subroutine import SubroutineKind, Subroutine
 
 
 class Parser:
+    """Класс парсера. Координирует действия остальных модулей,
+     а также выполняет свертки
+
+    Аргументы:
+    - grammar_file: Путь до файла грамматики
+    - states_file: Путь  до файла таблицы slr анализатора
+    - pout: Функция для вывода ошибок, интерфейс должен повторять print
+    """
+
     def __init__(self, grammar_file, states_file, pout=print):
         self.reader = GrammarReader(grammar_file)
         self.rules = self.reader.rules
@@ -19,6 +28,7 @@ class Parser:
         self.label_index = 0
 
     def _load_table(self, path):
+        """Загрузка таблицы slr анализатора"""
         with open(path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             fields = reader.fieldnames[1:]
@@ -34,11 +44,13 @@ class Parser:
                         self.action_table[(state_idx, symbol)] = value
 
     def _get_lookahead(self, token):
+        """Вернуть нужное значение из токена"""
         if token.token_type in (TokenType.keyword, TokenType.symbol):
             return token.val
         return token.token_type.name
 
     def run_parser(self, tokens):
+        """Основная рабоиа с анализатором и генерация кода"""
         tokens.append(Token(TokenType.EOF, "EOF"))
         stack = [0]
         value_stack = []
@@ -93,6 +105,7 @@ class Parser:
                 raise ERR_UNEXPECTED_STATE
 
     def tokenize_and_parse(self, text):
+        """Запуск токенайзера, токенизация перед запуском кодогенерации"""
         tokenizer = Tokenizer(text)
         tokens = tokenizer.tokenize()
         if not tokens:
@@ -100,6 +113,7 @@ class Parser:
         return self.run_parser(tokens)
 
     def precompile(self, table, text):
+        """Токенипзация и поиск сигнатур всех функций"""
         tokenizer = Tokenizer(text)
         tokens = tokenizer.tokenize()
         if not tokens:
@@ -172,6 +186,7 @@ class Parser:
         return True
 
     def parse(self, text, func_table):
+        """Полный парсинг кода. Возвращает корректен ли файл, список vm команд, имя класса"""
         self.generator = CodeGenerator(func_table, self.label_index)
         res = self.tokenize_and_parse(text)
         self.label_index = self.generator.label_idx

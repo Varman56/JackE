@@ -2,6 +2,8 @@ from enum import StrEnum
 
 
 class NTTitle(StrEnum):
+    """Класс для хранения названий нетерминалов. Они повторяют нетерминалы из файла грамматики"""
+
     S = "S"
     ClassVarDecList = "ClassVarDecList"
     SubroutineDecList = "SubroutineDecList"

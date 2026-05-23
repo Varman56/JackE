@@ -2,6 +2,8 @@ from enum import Enum
 
 
 class SymbolKind(Enum):
+    """Виды сегментов памяти переменной"""
+
     STATIC = "static"
     FIELD = "this"
     ARG = "argument"
@@ -9,6 +11,15 @@ class SymbolKind(Enum):
 
 
 class Symbol:
+    """Класс для хранения переменной
+
+     Аргументы:
+    - name: имя переменной
+    - kind: к какому сегменту памяти относится
+    - index: индекс в сегменте памяти
+    - var_type: тип переменной
+    """
+
     def __init__(self, name, kind: SymbolKind, index: int, var_type):
         self.name = name
         self.kind = kind

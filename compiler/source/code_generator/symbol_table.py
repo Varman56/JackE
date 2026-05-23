@@ -4,13 +4,12 @@ from compiler.source.code_generator.non_terminal import NonTerminal
 
 
 class SymbolTable:
+    """Класс таблицы символов файла .jack"""
+
     def __init__(self):
         self.class_symbols = {}
         self.subroutine_symbols = {}
         self.counts = {kind: 0 for kind in SymbolKind}
-
-    def contains(self, name: str) -> bool:
-        return name in self.subroutine_symbols or name in self.class_symbols
 
     def start_subroutine(self):
         """Очищает таблицу подпрограммы"""
@@ -30,37 +29,10 @@ class SymbolTable:
         self.counts[kind] += 1
 
     def var_count(self, kind):
+        """Возвращает количество переменных определенного типа"""
         return self.counts[kind]
 
-    # def _check_unknown_symbol(self, var: NonTerminal):
-    #     name = var.get_val()
-    #     if name not in self.subroutine_symbols and name not in self.class_symbols:
-    #         raise ErrUnknownSymbol(var.start_token.row, var.start_token.col)
-    #
-    # def kind_of(self, var: NonTerminal):
-    #     self._check_unknown_symbol(var)
-    #     res = self.subroutine_symbols.get(var.get_val()) or self.class_symbols.get(
-    #         var.get_val()
-    #     )
-    #     return res["kind"]
-
     def __getitem__(self, var: NonTerminal):
-        # self._check_unknown_symbol(var)
+        """Пытается найти функцию по имени, возвращает функцию и нашлась ли она"""
         res = self.subroutine_symbols.get(var.val) or self.class_symbols.get(var.val)
         return res, res is not None
-
-    # def get_subroutine(self, name: str):
-    #     res = self.subroutine_symbols.get(name)
-    #     return res["kind"], res["index"]
-    #
-    # def type_of(self, var: NonTerminal):
-    #     self._check_unknown_symbol(var)
-    #     name = var.get_val()
-    #     res = self.subroutine_symbols.get(name) or self.class_symbols.get(name)
-    #     return res["type"]
-    #
-    # def index_of(self, var: NonTerminal):
-    #     self._check_unknown_symbol(var)
-    #     name = var.get_val()
-    #     res = self.subroutine_symbols.get(name) or self.class_symbols.get(name)
-    #     return res["index"]

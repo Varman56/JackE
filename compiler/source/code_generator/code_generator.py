@@ -18,6 +18,13 @@ from compiler.source.precompile.subroutine_kind import SubroutineKind
 
 
 class CodeGenerator:
+    """Класс генератора кода. Записывает вм команды в зависимости от нетерминала
+
+    Аргументы:
+    - func_table: таблица функций найденных на этапе прекомпиляции
+    - label_idx: индексация лейблов должна сохранятьося между несколькими файлами
+    """
+
     def __init__(self, func_table, label_idx):
         self.class_name = ""
         self.current_kind = None
@@ -29,9 +36,11 @@ class CodeGenerator:
         self.init_map()
 
     def get_collected(self):
+        """Вернуть список команд виртуальной машины"""
         return self.vm.get_collected()
 
     def init_map(self):
+        """Обработчики нетерминалов"""
         self.handler_map = {
             NTTitle.S: self.handle_s,
             NTTitle.ClassVarDecList: self.handle_class_var_dec_list,
@@ -299,13 +308,9 @@ class CodeGenerator:
                 raise ErrUnknownFunc(full_name)
             if sig.kind == SubroutineKind.method:
                 writable.vm.write_push("pointer", 0)
-                if len(args) == 4:  # SubroutineName '(' ExpressionList ')'
-                    writable.extend(args[2].vm)
-                writable.vm.write_call(full_name, sig.nargs + 1)
-            else:
-                if len(args) == 4:
-                    writable.extend(args[2].vm)
-                writable.vm.write_call(full_name, sig.nargs)
+            if len(args) == 4:  # SubroutineName '(' ExpressionList ')'
+                writable.extend(args[2].vm)
+            writable.vm.write_call(full_name, sig.get_nargs())
 
         else:
             sub_name = args[2].val
@@ -326,10 +331,7 @@ class CodeGenerator:
             if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
                 writable.extend(args[4].vm)
 
-            n_args = sig.nargs
-            if sig.kind == SubroutineKind.method:
-                n_args += 1
-            writable.vm.write_call(full_name, n_args)
+            writable.vm.write_call(full_name, sig.get_nargs())
         return writable
 
     # ExpressionList -> Expression

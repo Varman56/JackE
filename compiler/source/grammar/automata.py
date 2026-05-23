@@ -3,6 +3,11 @@ from compiler.source.grammar.item import Item
 
 
 class Automata:
+    """Класс для построения lr-0 пунктов автомата
+
+     Аргументы:
+    - filename: Путь до файла грамматики"""
+
     def __init__(self, filename):
         self.reader = GrammarReader(filename)
 
@@ -22,6 +27,7 @@ class Automata:
         self.build_lr0_states()
 
     def build_first(self):
+        """Построение множества first"""
         changed = True
         while changed:
             changed = False
@@ -38,6 +44,7 @@ class Automata:
                     changed = True
 
     def build_follow(self):
+        """Построение множества follow"""
         self.follow[self.start_symbol].add("EOF")
 
         changed = True
@@ -67,6 +74,7 @@ class Automata:
                             changed = True
 
     def print_info(self):
+        """Вывод информации о множествах"""
         print("--- FIRST Sets ---")
         for nt, symbols in sorted(self.first.items()):
             print(f"FIRST({nt:20}) = {{ {', '.join(sorted(symbols))} }}")
@@ -80,6 +88,7 @@ class Automata:
         return "|".join(sorted([str(item) for item in items]))
 
     def closure(self, items):
+        "Построение замыкания"
         closure_set = set(items)
         added_symbols = set()
 
@@ -99,6 +108,7 @@ class Automata:
         return list(closure_set)
 
     def goto(self, items, symbol):
+        """Переход по символу"""
         new_set = []
         for item in items:
             if item.next_symbol == symbol:
@@ -106,6 +116,7 @@ class Automata:
         return self.closure(new_set)
 
     def build_lr0_states(self):
+        """Построение lr-0 состояний"""
         start_rule = self.reader.rules[0]
         initial_state = self.closure([Item(start_rule, 0)])
 
