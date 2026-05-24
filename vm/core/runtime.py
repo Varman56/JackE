@@ -3,7 +3,6 @@ Hack Virtual Machine Runtime
 Эмулятор виртуальной машины из курса Nand to Tetris
 """
 
-
 from vm.core.instruction import Function, Label
 from vm.core.program import Program
 from vm.core.memory import VMMemory
@@ -12,6 +11,7 @@ from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
 from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
+from vm.builtin.screen import ScreenLibrary
 from vm.builtin.string import StringLibrary
 
 
@@ -21,8 +21,7 @@ class VirtualMachine:
     Выполняет VM инструкции и управляет памятью
     """
 
-    def __init__(self, gui: bool = False, debug: bool = False):
-        self.gui = gui
+    def __init__(self, debug: bool = False):
         self.debug = debug
         self.memory = VMMemory()
         self.builtin_registry = BuiltinRegistry()
@@ -44,6 +43,7 @@ class VirtualMachine:
         self.builtin_registry.register_library(StringLibrary())
         self.builtin_registry.register_library(OutputLibrary())
         self.builtin_registry.register_library(KeyboardLibrary())
+        self.builtin_registry.register_library(ScreenLibrary())
 
     def run_program(self, program: Program):
         """
@@ -59,6 +59,9 @@ class VirtualMachine:
         program._current_instruction_index = 0
 
         while program._current_instruction_index < len(program.instructions):
+            if ScreenLibrary.is_screen_closed():
+                break
+
             instruction = program.get_current_instruction()
 
             if instruction.source_file:

@@ -1,0 +1,109 @@
+call Screen.init 0
+call Keyboard.init 0
+
+label loop
+
+call Keyboard.keyPressed 0
+push constant 48 // 0
+eq
+not
+if-goto scipwhite
+push constant 0
+call Screen.setColor 1
+pop temp 0
+label scipwhite
+
+call Keyboard.keyPressed 0
+push constant 49 // 1
+eq
+not
+if-goto scipblack
+push constant 1
+call Screen.setColor 1
+pop temp 0
+label scipblack
+
+call Keyboard.keyPressed 0
+push constant 82 // R
+eq
+not
+if-goto scipred
+push constant 255
+push constant 0
+push constant 0
+call Screen.setColorRGB 3
+pop temp 0
+label scipred
+
+call Keyboard.keyPressed 0
+push constant 71 // G
+eq
+not
+if-goto scipgreen
+push constant 0
+push constant 255
+push constant 0
+call Screen.setColorRGB 3
+pop temp 0
+label scipgreen
+
+call Keyboard.keyPressed 0
+push constant 66 // B
+eq
+not
+if-goto scipblue
+push constant 0
+push constant 0
+push constant 255
+call Screen.setColorRGB 3
+pop temp 0
+label scipblue
+
+call Keyboard.keyPressed 0
+push constant 67 // C
+eq
+not
+if-goto scipcircle
+push constant 100
+push constant 100
+push constant 25
+call Screen.drawCircle 3
+pop temp 0
+label scipcircle
+
+call Keyboard.keyPressed 0
+push constant 76 // L
+eq
+not
+if-goto scipline
+push constant 300
+push constant 150
+push constant 200
+push constant 50
+call Screen.drawLine 4
+pop temp 0
+label scipline
+
+call Keyboard.keyPressed 0
+push constant 83 // S
+eq
+not
+if-goto scipsquare
+push constant 350
+push constant 50
+push constant 450
+push constant 150
+call Screen.drawRectangle 4
+pop temp 0
+label scipsquare
+
+call Keyboard.keyPressed 0
+push constant 81 // Q
+eq
+not
+if-goto scipclear
+call Screen.clearScreen 0
+pop temp 0
+label scipclear
+
+goto loop

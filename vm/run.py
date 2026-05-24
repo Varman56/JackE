@@ -6,6 +6,7 @@ Hack VM - главный файл для запуска виртуальной �
 import argparse
 from pathlib import Path
 
+from vm.builtin.screen import ScreenLibrary
 from vm.core.instruction import Function
 from vm.core.program import Program
 from vm.core.runtime import VirtualMachine
@@ -114,6 +115,14 @@ def main():
         else:
             print("Стек пуст")
 
+        return 0
+
+    except KeyboardInterrupt as _:
+        ScreenLibrary.close_screen()
+        print()
+        print("=" * 60)
+        print("Выполнение программы было прервано пользователем")
+        print("=" * 60)
         return 0
 
     except Exception as e:
