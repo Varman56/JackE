@@ -28,12 +28,12 @@ def main():
         ),
         (
             ("--build-grammar",),
-            dict(action="store_false", help="Пересобрать SLR-таблицу"),
+            dict(action="store_true", help="Пересобрать SLR-таблицу"),
         ),
         (
             ("--ignore-build-exist",),
             dict(
-                action="store_false",
+                action="store_true",
                 help="Игнорировать предупреждение о перезаписи и удалении файлов",
             ),
         ),
