@@ -1,4 +1,4 @@
-from compiler.source.compiler import Compiler
+from compiler.compiler import Compiler
 from vm.core.runtime import VirtualMachine
 from vm.core.program import Program
 import argparse
@@ -15,14 +15,14 @@ def main():
         (
             ("-g", "--grammar-file"),
             dict(
-                default="./compiler/source/grammar/grammar.slr",
+                default="./compiler/grammar/grammar.slr",
                 help="Путь до файла грамматики jack",
             ),
         ),
         (
             ("-s", "--states-file"),
             dict(
-                default="./compiler/source/grammar/jack_slr_table.csv",
+                default="./compiler/grammar/jack_slr_table.csv",
                 help="Путь до slr таблицы",
             ),
         ),
