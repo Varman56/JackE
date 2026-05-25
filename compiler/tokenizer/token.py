@@ -21,5 +21,7 @@ class Token:
     def eq_pos(self, other: Token) -> bool:
         return self.row == other.row and self.col == other.col
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Token):
+            return NotImplemented
         return self.val == other.val and self.token_type == other.token_type

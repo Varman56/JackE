@@ -70,4 +70,3 @@ class TestTokenizer:
             assert tokens[i] == expected
             assert tokens[i].eq_pos(expected)
         assert len(tokens) == len(expected_tokens)
-
