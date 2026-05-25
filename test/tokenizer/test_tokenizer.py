@@ -1,7 +1,5 @@
 import pytest
-from compiler.tokenizer.tokenizer import Tokenizer
-from tokenizer.token import Token
-from tokenizer.token_type import TokenType
+from compiler.tokenizer.tokenizer import Tokenizer, TokenType, Token
 
 
 class TestTokenizer:
@@ -73,9 +71,3 @@ class TestTokenizer:
             assert tokens[i].eq_pos(expected)
         assert len(tokens) == len(expected_tokens)
 
-    # def test_invalid(self):
-    #     text = '`awflpfaw'
-    #     self.setup(text)
-    #     with pytest.raises(ValueError):
-    #         tokens = self.tokenizer.tokenize()
-    #     print(tokens)
