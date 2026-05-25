@@ -128,6 +128,7 @@ class Compiler:
         print(f"Compiling {len(files)} files...")
 
         success_files = []
+        failed_classes = []
 
         for file in files:
             print(f"\n--- Processing: {file} ---")
@@ -140,6 +141,12 @@ class Compiler:
             if success:
                 res = "SUCCESS"
                 success_files.append(self.save_vm_file(commands, class_name))
+            else:
+                failed_classes.append(class_name)
             print(f"--- RESULT STATUS:  {res} ---")
 
+        if failed_classes:
+            print()
+            print(f"Classes with failures: \n{'\n'.join(failed_classes)}")
+            print(f"\nYou can see the error{'s' if len(failed_classes) > 1 else ''} above")
         return success_files
