@@ -121,8 +121,14 @@ class CodeGenerator:
                 VarTypes.unknown,
                 var_list=[args[0].val],
             )
-        args[0].var_list.append(args[2].val)
-        return args[0]
+        nt = NTwithVarList(
+            NTTitle.VarNameList,
+            self._get_start_token(args[0]),
+            VarTypes.unknown,
+            var_list=args[0].get_var_list,
+        )
+        nt.var_list.append(args[2].val)
+        return nt
 
     # Type -> 'int'
     # Type -> 'char'
@@ -150,8 +156,13 @@ class CodeGenerator:
                 self._get_start_token(args[0]),
                 typed_var_list=[(args[0].val, args[1].val)],
             )
-        args[0].typed_var_list.append((args[2].val, args[3].val))
-        return args[0]
+        nt = NTwithTypedVarList(
+            NTTitle.TypedVarNameList,
+            self._get_start_token(args[0]),
+            typed_var_list=args[0].get_typed_var_list,
+        )
+        nt.typed_var_list.append((args[2].val, args[3].val))
+        return nt
 
     # ParameterList -> '(' ')'
     # ParameterList -> '(' TypedVarNameList ')'

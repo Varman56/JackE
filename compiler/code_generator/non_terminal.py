@@ -20,9 +20,18 @@ class NonTerminal:
         self.start_token = start_token
         self.val = val
         self.kwargs = kwargs
+        self.vm = VMWriter()
 
     def __repr__(self) -> str:
         return f"{self.title} ({self.start_token.row} {self.start_token.col})"
+
+    @property
+    def get_typed_var_list(self) -> list[tuple[VarTypes | str, str]]:
+        raise NotImplementedError("Use NTwithTypedVarList for get_typed_var_list using")
+
+    @property
+    def get_var_list(self) -> list[str]:
+        raise NotImplementedError("Use NTwithVarList for get_var_list using")
 
 
 class NTwithTypedVarList(NonTerminal):  # (type name, type name, ...)

@@ -1,7 +1,8 @@
 import csv
+from typing import Optional
 
-from compiler.errors.parser_errors import ERR_UNEXPECTED_STATE
-from compiler.code_generator.code_generator import CodeGenerator
+from compiler.errors.parser_errors import ERR_UNEXPECTED_STATE, ErrorUnexpectedGoToState
+from compiler.code_generator.code_generator import CodeGenerator, HANDLER_TYPE
 from compiler.tokenizer.tokenizer import Tokenizer, TokenType, Token
 from compiler.grammar.grammar_reader import GrammarReader
 from compiler.precompile.subroutine import SubroutineKind, Subroutine
@@ -22,13 +23,16 @@ class Parser:
         self.action_table: dict[tuple[int, str], str] = {}
         self.goto_table: dict[tuple[int, str], int] = {}
         self._load_table(states_file)
-        self.generator = None
+        self.generator: Optional[CodeGenerator] = None
         self.label_index = 0
 
     def _load_table(self, path: str) -> None:
         """Загрузка таблицы slr анализатора"""
         with open(path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
+            if reader.fieldnames is None:
+                print(f"Internal Error: File {path} not found or incorrect format")
+                return
             fields = reader.fieldnames[1:]
             for row in reader:
                 state_idx = int(row["State"])
@@ -49,10 +53,13 @@ class Parser:
         return token.token_type.name
 
     def _run_parser(self, tokens: list[Token]) -> bool:
+        if not isinstance(self.generator, CodeGenerator):
+            print("Internal Error: Code generator is not initialized")
+            return False
         """Основная рабоиа с анализатором и генерация кода"""
         tokens.append(Token(TokenType.EOF, "EOF"))
         stack = [0]
-        value_stack = []
+        value_stack: HANDLER_TYPE = []
 
         i = 0
         while True:
@@ -96,6 +103,8 @@ class Parser:
                     return False
                 state_before = stack[-1]
                 goto_state = self.goto_table.get((state_before, rule.left))
+                if goto_state is None:
+                    raise ErrorUnexpectedGoToState(state_before, rule.left)
                 stack.append(goto_state)
                 value_stack.append(result)
             elif action == "ACC":

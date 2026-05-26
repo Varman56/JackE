@@ -113,7 +113,7 @@ class OsSubroutines:
             ("halt", 0, "void"),
             ("error", 1, "void"),
             ("wait", 1, "void"),
-            ("exit", 0, "void"),
+            # ("exit", 0, "void"), found in some projects
         ]
         for name, n_args, ret_type in sys_funcs:
             sub = Subroutine("Sys", name, SubroutineKind.function, n_args, ret_type)
