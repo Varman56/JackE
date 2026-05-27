@@ -20,6 +20,7 @@ class MemoryLibrary:
 
     @staticmethod
     def _init(args: list[int], vm: VirtualMachine) -> int:
+        vm.memory.reset_heap()
         return 0
 
     @staticmethod

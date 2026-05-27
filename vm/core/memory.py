@@ -57,6 +57,13 @@ class VMMemory:
         # Простая куча без переиспользования освобожденных блоков.
         self.heap_next_free = self.HEAP_START
         self.heap_allocations: dict[int, int] = {}
+        self.heap_free_blocks: list[tuple[int, int]] = []
+
+    def reset_heap(self):
+        """Сбрасывает состояние кучи."""
+        self.heap_next_free = self.HEAP_START
+        self.heap_allocations.clear()
+        self.heap_free_blocks.clear()
 
     def set_current_file(self, filename: str):
         """Устанавливает текущий файл для static переменных"""
@@ -182,6 +189,21 @@ class VMMemory:
         if words <= 0:
             raise ValueError(f"Heap allocation size must be positive, got: {words}")
 
+        for i, (base, size) in enumerate(self.heap_free_blocks):
+            if size < words:
+                continue
+
+            base_address = base
+            if size == words:
+                del self.heap_free_blocks[i]
+            else:
+                self.heap_free_blocks[i] = (base + words, size - words)
+
+            self.heap_allocations[base_address] = words
+            for address in range(base_address, base_address + words):
+                self.memory[address] = 0
+            return base_address
+
         base_address = self.heap_next_free
         end_address = base_address + words
 
@@ -209,3 +231,28 @@ class VMMemory:
 
         for address in range(base_address, base_address + words):
             self.memory[address] = 0
+
+        self._add_free_block(base_address, words)
+
+    def _add_free_block(self, base_address: int, words: int):
+        if words <= 0:
+            return
+
+        index = 0
+        while index < len(self.heap_free_blocks) and self.heap_free_blocks[index][0] < base_address:
+            index += 1
+
+        self.heap_free_blocks.insert(index, (base_address, words))
+
+        if index > 0:
+            prev_base, prev_size = self.heap_free_blocks[index - 1]
+            if prev_base + prev_size == base_address:
+                base_address = prev_base
+                words += prev_size
+                self.heap_free_blocks[index - 1:index + 1] = [(base_address, words)]
+                index -= 1
+
+        if index + 1 < len(self.heap_free_blocks):
+            next_base, next_size = self.heap_free_blocks[index + 1]
+            if base_address + words == next_base:
+                self.heap_free_blocks[index:index + 2] = [(base_address, words + next_size)]
