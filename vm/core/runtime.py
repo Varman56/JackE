@@ -50,6 +50,7 @@ class VirtualMachine:
         self.builtin_registry.register_library(OutputLibrary())
         self.builtin_registry.register_library(KeyboardLibrary())
         self.builtin_registry.register_library(ScreenLibrary())
+        self.builtin_registry.register_library(SysLibrary())
 
     def run_program(self, program: Program):
         """
