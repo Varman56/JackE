@@ -6,6 +6,7 @@ Hack Virtual Machine Runtime
 from vm.core.instruction import Function, Label
 from vm.core.program import Program
 from vm.core.memory import VMMemory
+from vm.core.screen import ScreenWorker
 from vm.builtin.array import ArrayLibrary
 from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
@@ -24,6 +25,11 @@ class VirtualMachine:
     def __init__(self, debug: bool = False):
         self.debug = debug
         self.memory = VMMemory()
+
+        self.screen = ScreenWorker()
+        self.screen.start()
+        self.screen.ready.wait()
+
         self.builtin_registry = BuiltinRegistry()
         self._register_builtin_libraries()
 
@@ -59,7 +65,7 @@ class VirtualMachine:
         program._current_instruction_index = 0
 
         while program._current_instruction_index < len(program.instructions):
-            if ScreenLibrary.is_screen_closed():
+            if not self.screen.is_alive():
                 break
 
             instruction = program.get_current_instruction()
