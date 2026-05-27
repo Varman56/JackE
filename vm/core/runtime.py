@@ -6,13 +6,16 @@ Hack Virtual Machine Runtime
 from vm.core.instruction import Function, Label
 from vm.core.program import Program
 from vm.core.memory import VMMemory
+from vm.core.screen import ScreenWorker
 from vm.builtin.array import ArrayLibrary
 from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
+from vm.builtin.memory import MemoryLibrary
 from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
 from vm.builtin.screen import ScreenLibrary
 from vm.builtin.string import StringLibrary
+from vm.builtin.sys import SysLibrary
 
 
 class VirtualMachine:
@@ -22,8 +25,13 @@ class VirtualMachine:
     """
 
     def __init__(self, debug: bool = False):
+        self.screen = ScreenWorker()
+        self.screen.start()
+        self.screen.ready.wait()
+
         self.debug = debug
-        self.memory = VMMemory()
+        self.memory = VMMemory(self.screen)
+
         self.builtin_registry = BuiltinRegistry()
         self._register_builtin_libraries()
 
@@ -44,6 +52,8 @@ class VirtualMachine:
         self.builtin_registry.register_library(OutputLibrary())
         self.builtin_registry.register_library(KeyboardLibrary())
         self.builtin_registry.register_library(ScreenLibrary())
+        self.builtin_registry.register_library(SysLibrary())
+        self.builtin_registry.register_library(MemoryLibrary())
 
     def run_program(self, program: Program):
         """
@@ -59,7 +69,7 @@ class VirtualMachine:
         program._current_instruction_index = 0
 
         while program._current_instruction_index < len(program.instructions):
-            if ScreenLibrary.is_screen_closed():
+            if not self.screen.is_alive():
                 break
 
             instruction = program.get_current_instruction()

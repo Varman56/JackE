@@ -1,0 +1,8 @@
+push constant 69
+push constant 42
+call Memory.poke 2
+pop temp 0
+
+push constant 69
+call Memory.peek 1
+call Output.printInt 1

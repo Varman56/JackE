@@ -1,62 +1,12 @@
-import sys
 from threading import Lock
 from typing import TYPE_CHECKING
 
-from pynput import keyboard
-
+from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinFunction
 from vm.builtin.string import vm_string_from_text, vm_string_to_text
 
 if TYPE_CHECKING:
     from vm.core.runtime import VirtualMachine
-
-_KEY_TO_CODE = {
-    "-": 45,
-    "=": 61,
-    "[": 91,
-    "]": 93,
-    ";": 59,
-    "'": 39,
-    "\\": 92,
-    ",": 44,
-    ".": 46,
-    "/": 47,
-    "enter": 128,
-    "backspace": 129,
-    "left": 130,
-    "up": 131,
-    "right": 132,
-    "down": 133,
-    "home": 134,
-    "end": 135,
-    "page_up": 136,
-    "page_down": 137,
-    "insert": 138,
-    "delete": 139,
-    "esc": 140,
-    "f1": 141,
-    "f2": 142,
-    "f3": 143,
-    "f4": 144,
-    "f5": 145,
-    "f6": 146,
-    "f7": 147,
-    "f8": 148,
-    "f9": 149,
-    "f10": 150,
-    "f11": 151,
-    "f12": 152,
-}
-
-
-def _get_key_code(key: keyboard.KeyCode | keyboard.Key | None) -> int:
-    if isinstance(key, keyboard.KeyCode) and key.vk and key.vk < 152:
-        return key.vk
-    if isinstance(key, keyboard.KeyCode):
-        return _KEY_TO_CODE.get(key.char, 0)
-    if isinstance(key, keyboard.Key):
-        return _KEY_TO_CODE.get(key.name, 0)
-    return 0
 
 
 class KeyboardLibrary:
@@ -75,55 +25,48 @@ class KeyboardLibrary:
 
     @staticmethod
     def _init(args: list[int], vm: VirtualMachine) -> int:
-        listener = keyboard.Listener(
-            on_press=KeyboardLibrary._on_press, on_release=KeyboardLibrary._on_release
-        )
-        listener.daemon = True
-        listener.start()
         return 0
 
     @staticmethod
     def _key_pressed(args: list[int], vm: VirtualMachine) -> int:
-        with KeyboardLibrary._lock:
-            return KeyboardLibrary._current_key
+        return vm.screen.key_pressed()
 
     @staticmethod
     def _read_char(args: list[int], vm: VirtualMachine) -> int:
-        value = sys.stdin.read(1)
-        if value == "":
-            raise ValueError("Keyboard.readChar: достигнут конец ввода")
-        return ord(value[0])
+        OutputLibrary._print_char([0], vm)  # Отрисовка курсора
+        char = 0
+
+        while (
+            vm.screen.is_alive() and (char := KeyboardLibrary._key_pressed([], vm)) == 0
+        ):
+            pass
+
+        while (
+            vm.screen.is_alive()
+            and (new_char := KeyboardLibrary._key_pressed([], vm)) != 0
+        ):
+            char = new_char
+
+        if char not in (128, 129):
+            OutputLibrary._print_char([char], vm)
+
+        return char
 
     @staticmethod
     def _read_line(args: list[int], vm: VirtualMachine) -> int:
-        prompt_handle = args[0]
-        prompt = KeyboardLibrary._resolve_prompt(vm, prompt_handle)
-        try:
-            line = input(prompt)
-        except EOFError:
-            line = ""
-
+        line = KeyboardLibrary._getline(args, vm)
         return vm_string_from_text(vm, line)
 
     @staticmethod
     def _read_int(args: list[int], vm: VirtualMachine) -> int:
-        prompt_handle = args[0]
-        prompt = KeyboardLibrary._resolve_prompt(vm, prompt_handle)
-        try:
-            raw_value = input(prompt)
-        except EOFError as exc:
-            raise ValueError("Keyboard.readInt: достигнут конец ввода") from exc
+        line = KeyboardLibrary._getline(args, vm)
 
-        raw_value = raw_value.strip()
-        if raw_value == "":
-            return 0
-
-        try:
-            return int(raw_value)
-        except ValueError as exc:
-            raise ValueError(
-                f"Keyboard.readInt: не удалось преобразовать '{raw_value}' в int"
-            ) from exc
+        num = 0
+        for ch in line:
+            if not ch.isdigit():
+                break
+            num = num * 10 + int(ch)
+        return num
 
     @staticmethod
     def _resolve_prompt(vm: VirtualMachine, handle: int) -> str:
@@ -132,14 +75,22 @@ class KeyboardLibrary:
         return vm_string_to_text(vm, handle)
 
     @staticmethod
-    def _on_press(key: keyboard.KeyCode | keyboard.Key | None) -> None:
-        code = _get_key_code(key)
-        with KeyboardLibrary._lock:
-            KeyboardLibrary._current_key = code
+    def _getline(args: list[int], vm: VirtualMachine) -> str:
+        OutputLibrary._print_string(args, vm)
 
-    @staticmethod
-    def _on_release(key: keyboard.KeyCode | keyboard.Key | None) -> None:
-        code = _get_key_code(key)
-        with KeyboardLibrary._lock:
-            if KeyboardLibrary._current_key == code:
-                KeyboardLibrary._current_key = 0
+        line = ""
+        while vm.screen.is_alive():
+            char = KeyboardLibrary._read_char([], vm)
+            if char == 128:  # enter
+                OutputLibrary._clear_cursor(vm)
+                OutputLibrary._println([], vm)
+                break
+            elif char == 129:  # backspace
+                if line == "":
+                    continue
+                line = line[:-1]
+                OutputLibrary._back_space([], vm)
+            else:
+                line += chr(char)
+
+        return line

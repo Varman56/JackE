@@ -32,6 +32,7 @@ class VMParser:
 
     def __init__(self):
         self.instructions: list[Instruction] = []
+        self.current_function: str | None = None
 
     def parse_file(self, filepath: str) -> Program:
         """Читает VM файл и создает программу"""
@@ -43,6 +44,7 @@ class VMParser:
     def parse_lines(self, lines: list[str], source_file: str = "default") -> Program:
         """Парсит список строк VM кода"""
         self.instructions = []
+        self.current_function = None
 
         for line_num, line in enumerate(lines, 1):
             # Удаляем комментарии и пробелы
@@ -61,6 +63,11 @@ class VMParser:
                 raise ValueError(f"Ошибка парсинга на строке {line_num}: {line}\n{e}")
 
         return Program(self.instructions)
+
+    def _qualify_label(self, label: str) -> str:
+        if self.current_function:
+            return f"{self.current_function}${label}"
+        return label
 
     def _parse_line(self, line: str) -> Instruction:
         """Парсит одну строку VM кода"""
@@ -108,22 +115,23 @@ class VMParser:
         elif command == "label":
             if len(parts) != 2:
                 raise ValueError(f"label требует 1 аргумент: {line}")
-            return Label(parts[1])
+            return Label(self._qualify_label(parts[1]))
 
         elif command == "goto":
             if len(parts) != 2:
                 raise ValueError(f"goto требует 1 аргумент: {line}")
-            return Goto(parts[1])
+            return Goto(self._qualify_label(parts[1]))
 
         elif command == "if-goto":
             if len(parts) != 2:
                 raise ValueError(f"if-goto требует 1 аргумент: {line}")
-            return IfGoto(parts[1])
+            return IfGoto(self._qualify_label(parts[1]))
 
         # Function commands
         elif command == "function":
             if len(parts) != 3:
                 raise ValueError(f"function требует 2 аргумента: {line}")
+            self.current_function = parts[1]
             return Function(parts[1], int(parts[2]))
 
         elif command == "call":
