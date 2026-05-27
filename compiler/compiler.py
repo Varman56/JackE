@@ -154,8 +154,7 @@ class Compiler:
 
         if failed_classes:
             print()
-            print(f"Classes with failures: \n{'\n'.join(failed_classes)}")
-            print(
-                f"\nYou can see the error{'s' if len(failed_classes) > 1 else ''} above"
-            )
+            print(f"Классы с ошибками компиляции: \n{'\n'.join(failed_classes)}")
+            print("\nВы можете увидеть конкретные ошибки выше")
+        print("-" * 50 + "\n")
         return success_files

@@ -320,7 +320,7 @@ class CodeGenerator:
             full_name = f"{class_name}.{sub_name}"
             sig = self.subroutine_table.get(full_name)
             if sig is None:
-                raise ErrUnknownFunc(full_name)
+                raise ErrUnknownFunc(full_name, *args[0].start_token.get_pos())
             if sig.kind == SubroutineKind.method:
                 writable.vm.write_push("pointer", 0)
             if len(args) == 4:  # SubroutineName '(' ExpressionList ')'
@@ -335,13 +335,13 @@ class CodeGenerator:
                 full_name = f"{var.var_type}.{sub_name}"
                 sig = self.subroutine_table.get(full_name)
                 if sig is None:
-                    raise ErrUnknownFunc(full_name)
+                    raise ErrUnknownFunc(full_name, *args[2].start_token.get_pos())
                 writable.vm.write_push(var.kind, var.index)
             else:
                 full_name = f"{name}.{sub_name}"
                 sig = self.subroutine_table.get(full_name)
                 if sig is None:
-                    raise ErrUnknownFunc(full_name)
+                    raise ErrUnknownFunc(full_name, *args[2].start_token.get_pos())
 
             if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
                 writable.extend(args[4].vm)
