@@ -22,6 +22,7 @@ class CommandType(Enum):
     DRAW_LINE = "drawLine"
     DRAW_RECTANGLE = "drawRectangle"
     DRAW_CIRCLE = "drawCircle"
+    CLEAR_RECTANGLE = "clearRectangle"
 
 
 @dataclass(frozen=True)
@@ -85,6 +86,8 @@ class ScreenWorker(Thread):
                     self._draw_rectangle(*command.args)
                 case CommandType.DRAW_CIRCLE:
                     self._draw_circle(*command.args)
+                case CommandType.CLEAR_RECTANGLE:
+                    self._clear_rectangle(*command.args)
 
     def close_screen(self) -> None:
         self.running.clear()
@@ -105,13 +108,19 @@ class ScreenWorker(Thread):
     def _draw_rectangle(self, x1: int, y1: int, x2: int, y2: int) -> None:
         if x2 < x1 or y2 < y1:
             raise ValueError("Первая точка должна находиться левее и выше второй")
-        dx, dy = x2 - x1, y2 - y1
+        dx, dy = x2 - x1 + 1, y2 - y1 + 1
         pygame.draw.rect(self.screen, self.color, (x1, y1, dx, dy))
 
     def _draw_circle(self, x: int, y: int, r: int) -> None:
         if r > 181:
             raise ValueError("Радиус круга не должен превышать 181 пиксель")
         pygame.draw.circle(self.screen, self.color, (x, y), r)
+
+    def _clear_rectangle(self, x1: int, y1: int, x2: int, y2: int) -> None:
+        if x2 < x1 or y2 < y1:
+            raise ValueError("Первая точка должна находиться левее и выше второй")
+        dx, dy = x2 - x1 + 1, y2 - y1 + 1
+        pygame.draw.rect(self.screen, WHITE, (x1, y1, dx, dy))
 
     def clear_screen(self) -> None:
         self.commands.put(Command(CommandType.CLEAR_SCREEN))
@@ -130,3 +139,6 @@ class ScreenWorker(Thread):
 
     def draw_circle(self, x: int, y: int, r: int) -> None:
         self.commands.put(Command(CommandType.DRAW_CIRCLE, [x, y, r]))
+
+    def clear_rectangle(self, x1: int, y1: int, x2: int, y2: int) -> None:
+        self.commands.put(Command(CommandType.CLEAR_RECTANGLE, [x1, y1, x2, y2]))
