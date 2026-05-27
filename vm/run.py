@@ -118,7 +118,8 @@ def main():
         return 0
 
     except KeyboardInterrupt as _:
-        ScreenLibrary.close_screen()
+        if ScreenLibrary.worker.is_alive():
+            ScreenLibrary.close_screen()
         print()
         print("=" * 60)
         print("Выполнение программы было прервано пользователем")
