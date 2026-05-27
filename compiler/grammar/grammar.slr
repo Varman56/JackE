@@ -1,0 +1,126 @@
+S' -> S
+
+S -> 'class' ClassName '{' ClassVarDecList SubroutineDecList '}'
+S -> 'class' ClassName '{' ClassVarDecList '}'
+S -> 'class' ClassName '{' SubroutineDecList '}'
+S -> 'class' ClassName '{' '}'
+
+ClassVarDecList -> ClassVarDec
+ClassVarDecList -> ClassVarDecList ClassVarDec
+
+SubroutineDecList -> SubroutineDec
+SubroutineDecList -> SubroutineDecList SubroutineDec
+
+ClassVarDec -> 'static' Type VarNameList ';'
+ClassVarDec -> 'field' Type VarNameList ';'
+
+Type -> 'int'
+Type -> 'char'
+Type -> 'boolean'
+Type -> ClassName
+
+VarNameList -> VarName
+VarNameList -> VarNameList ',' VarName
+
+VarName -> identifier
+
+ClassName -> identifier
+
+SubroutineDec -> 'constructor' ClassName SubroutineName ParameterList SubroutineBody
+SubroutineDec -> 'function' ReturnType SubroutineName ParameterList SubroutineBody
+SubroutineDec -> 'method' ReturnType SubroutineName ParameterList SubroutineBody
+
+ReturnType -> Type
+ReturnType -> 'void'
+
+SubroutineName -> identifier
+
+ParameterList -> '(' ')'
+ParameterList -> '(' TypedVarNameList ')'
+
+TypedVarNameList -> Type VarName
+TypedVarNameList -> TypedVarNameList ',' Type VarName
+
+SubroutineBody -> '{' VarDeclarationList StatementsList '}'
+SubroutineBody -> '{' VarDeclarationList '}'
+SubroutineBody -> '{' StatementsList '}'
+SubroutineBody -> '{' '}'
+
+VarDeclarationList -> VarDeclaration
+VarDeclarationList -> VarDeclarationList VarDeclaration
+
+VarDeclaration -> 'var' Type VarNameList ';'
+
+StatementsList -> Statement
+StatementsList -> StatementsList Statement
+
+Statement -> LetStatement
+Statement -> IfStatement
+Statement -> WhileStatement
+Statement -> DoStatement
+Statement -> ReturnStatement
+
+LetStatement -> 'let' VarName '=' Expression ';'
+LetStatement -> 'let' VarName '[' Expression ']' '=' Expression ';'
+
+IfStatement -> IfHeader '{' StatementsList '}'
+IfStatement -> IfHeader '{' StatementsList '}' ElsePart
+IfStatement -> IfHeader '{' '}'
+IfStatement -> IfHeader '{' '}' ElsePart
+
+IfHeader -> 'if' '(' Expression ')'
+
+ElsePart -> 'else' '{' StatementsList '}'
+ElsePart -> 'else' '{' '}'
+
+WhileHeader -> 'while' '(' Expression ')'
+
+WhileStatement -> WhileHeader '{' StatementsList '}'
+WhileStatement -> WhileHeader '{' '}'
+
+DoStatement -> 'do' SubroutineCall ';'
+
+ReturnStatement -> 'return' ';'
+ReturnStatement -> 'return' Expression ';'
+
+Expression -> Term
+Expression -> Expression Operation Term
+Expression -> UnaryOperationList Term
+Expression -> Expression Operation UnaryOperationList Term
+
+UnaryOperationList -> UnaryOperation
+UnaryOperationList -> UnaryOperationList UnaryOperation
+
+Term -> integerConstant
+Term -> stringConstant
+Term -> KeywordConstant
+Term -> VarName
+Term -> VarName '[' Expression ']'
+Term -> '(' Expression ')'
+Term -> SubroutineCall
+
+SubroutineCall -> SubroutineName '(' ExpressionList ')'
+SubroutineCall -> VarName '.' SubroutineName '(' ExpressionList ')'
+SubroutineCall -> SubroutineName '(' ')'
+SubroutineCall -> VarName '.' SubroutineName '(' ')'
+
+ExpressionList -> Expression
+ExpressionList -> ExpressionList ',' Expression
+
+KeywordConstant -> 'true'
+KeywordConstant -> 'false'
+KeywordConstant -> 'null'
+KeywordConstant -> 'this'
+
+UnaryOperation -> '-'
+UnaryOperation -> '~'
+
+Operation -> '+'
+Operation -> '-'
+Operation -> '*'
+Operation -> '/'
+Operation -> '&'
+Operation -> '|'
+Operation -> '>'
+Operation -> '<'
+Operation -> '='
