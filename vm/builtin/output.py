@@ -85,8 +85,13 @@ class OutputLibrary:
     @staticmethod
     def _print_char(args: list[int], vm: VirtualMachine) -> int:
         value = args[0] & 0xFFFF
-        x, y = OutputLibrary.cursor.get_cords()
 
+        # printing \n
+        if value == 128:
+            OutputLibrary._println([], vm)
+            return 0
+
+        x, y = OutputLibrary.cursor.get_cords()
         vm.screen.clear_rectangle(x * CHAR_WIDTH,
                                   y * CHAR_HEIGHT,
                                   (x + 1) * CHAR_HEIGHT - 1,
@@ -108,7 +113,7 @@ class OutputLibrary:
         handle = args[0]
         text = vm_string_to_text(vm, handle)
         for ch in text:
-            code = int(ch)
+            code = ord(ch)
             OutputLibrary._print_char([code], vm)
         return 0
 
@@ -138,3 +143,13 @@ class OutputLibrary:
 
         OutputLibrary.cursor.move_left()
         return 0
+
+    @staticmethod
+    def _clear_cursor(vm) -> None:
+        x, y = OutputLibrary.cursor.get_cords()
+
+        vm.screen.clear_rectangle(x * CHAR_WIDTH,
+                                  y * CHAR_HEIGHT,
+                                  (x + 1) * CHAR_HEIGHT - 1,
+                                  (y + 1) * CHAR_HEIGHT - 1,
+                                  )
