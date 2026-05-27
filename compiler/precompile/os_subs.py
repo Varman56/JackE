@@ -79,6 +79,8 @@ class OsSubroutines:
             ("drawLine", 4, "void"),
             ("drawRectangle", 4, "void"),
             ("drawCircle", 3, "void"),
+            ("setColorRGB", 3, "void"),
+            ("setFontColor", 3, "void"),
         ]
         for name, n_args, ret_type in screen_funcs:
             sub = Subroutine("Screen", name, SubroutineKind.function, n_args, ret_type)
