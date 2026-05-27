@@ -3,7 +3,7 @@ name = "jacke"
 description = "Jack compilation and run"
 readme = "README.md"
 requires-python = ">=3.14"
-version = "0.01"
+version = "1"
 dependencies = [
     "mypy>=1.19.1",
     "pygame-ce>=2.5.7",
@@ -11,4 +11,19 @@ dependencies = [
     "pytest>=9.0.2",
     "ruff>=0.15.4",
     "types-pynput>=1.8.1.20260408",
+]
+
+[project.scripts]
+jacke = "main:main"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["compiler", "vm"]
+include = [
+    "main.py",
+    "compiler/grammar/grammar.slr",
+    "compiler/grammar/jack_slr_table.csv",
 ]
