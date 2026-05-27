@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 from queue import Queue
 
 import pygame
@@ -13,6 +13,54 @@ WINDOW_TITLE = "JackE screen"
 ICON_PATH = "JackE_icon.bmp"
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+
+_KEY_TO_CODE = {
+    44: 32,  # space
+    39: 48,  # 0
+    45: 45,  # -
+    46: 61,  # =
+    47: 91,  # [
+    48: 93,  # ]
+    51: 59,  # ;
+    52: 39,  # '
+    49: 92,  # \
+    54: 44,  # ,
+    55: 46,  # .
+    56: 47,  # /
+    40: 128,  # enter
+    42: 129,  # backspace
+    80: 130,  # left
+    82: 131,  # up
+    79: 132,  # right
+    81: 133,  # down
+    74: 134,  # home
+    77: 135,  # end
+    75: 136,  # page_up
+    78: 137,  # page_down
+    73: 138,  # insert
+    76: 139,  # delete
+    41: 140,  # esc
+    58: 141,  # f1
+    59: 142,  # f2
+    60: 143,  # f3
+    61: 144,  # f4
+    62: 145,  # f5
+    63: 146,  # f6
+    64: 147,  # f7
+    65: 148,  # f8
+    66: 149,  # f9
+    67: 150,  # f10
+    68: 151,  # f11
+    69: 152,  # f12
+}
+
+
+def _get_key_code(key: int) -> int:
+    if 4 <= key <= 29:  # A-Z
+        return key + 61
+    if 30 <= key <= 38:
+        return key + 19
+    return _KEY_TO_CODE.get(key, 0)
 
 
 class CommandType(Enum):
@@ -46,6 +94,9 @@ class ScreenWorker(Thread):
         self.color: tuple[int, int, int] = BLACK
         self.clock: pygame.time.Clock | None = None
 
+        self._key_pressed = 0
+        self._key_lock = Lock()
+
     def run(self) -> None:
         pygame.init()
         pygame.display.set_caption(WINDOW_TITLE)
@@ -64,9 +115,18 @@ class ScreenWorker(Thread):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running.clear()
-                self._process_commands()
-                pygame.display.update()
-                self.clock.tick(FPS)
+
+                elif event.type == pygame.KEYDOWN:
+                    with self._key_lock:
+                        self._key_pressed = _get_key_code(event.scancode)
+
+                elif event.type == pygame.KEYUP:
+                    with self._key_lock:
+                        if self._key_pressed == _get_key_code(event.scancode):
+                            self._key_pressed = 0
+
+            self._process_commands()
+            self.clock.tick(FPS)
 
         pygame.quit()
 
@@ -88,6 +148,7 @@ class ScreenWorker(Thread):
                     self._draw_circle(*command.args)
                 case CommandType.CLEAR_RECTANGLE:
                     self._clear_rectangle(*command.args)
+        pygame.display.update()
 
     def close_screen(self) -> None:
         self.running.clear()
@@ -142,3 +203,7 @@ class ScreenWorker(Thread):
 
     def clear_rectangle(self, x1: int, y1: int, x2: int, y2: int) -> None:
         self.commands.put(Command(CommandType.CLEAR_RECTANGLE, [x1, y1, x2, y2]))
+
+    def key_pressed(self) -> int:
+        with self._key_lock:
+            return self._key_pressed

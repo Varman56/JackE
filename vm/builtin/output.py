@@ -105,7 +105,8 @@ class OutputLibrary:
                     continue
                 vm.screen.draw_pixel(x * CHAR_WIDTH + ch_x, y * CHAR_HEIGHT + ch_y)
 
-        OutputLibrary.cursor.move_right()
+        if value != 0:
+            OutputLibrary.cursor.move_right()
         return 0
 
     @staticmethod
