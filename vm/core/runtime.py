@@ -14,6 +14,7 @@ from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
 from vm.builtin.screen import ScreenLibrary
 from vm.builtin.string import StringLibrary
+from vm.builtin.sys import SysLibrary
 
 
 class VirtualMachine:
@@ -83,6 +84,8 @@ class VirtualMachine:
             # Переходим к следующей инструкции (если инструкция не управляет переходом сама)
             if instruction.should_advance():
                 program.next_instruction()
+
+        self.screen.close_screen()
 
         if self.debug:
             print(

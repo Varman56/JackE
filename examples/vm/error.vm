@@ -1,0 +1,11 @@
+push constant 1
+call Output.printInt 1
+pop temp 0
+
+push constant 42
+call Sys.error 1
+pop temp 0
+
+push constant 2
+call Output.printInt 1
+pop temp 0
