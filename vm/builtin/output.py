@@ -78,7 +78,7 @@ class OutputLibrary:
 
     @staticmethod
     def _move_cursor(args: list[int], vm: VirtualMachine) -> int:
-        x, y = args[0], args[1]
+        y, x = args[0], args[1]
         OutputLibrary.cursor.set_cords(x, y)
         return 0
 
