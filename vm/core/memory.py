@@ -262,7 +262,10 @@ class VMMemory:
             return
 
         index = 0
-        while index < len(self.heap_free_blocks) and self.heap_free_blocks[index][0] < base_address:
+        while (
+            index < len(self.heap_free_blocks)
+            and self.heap_free_blocks[index][0] < base_address
+        ):
             index += 1
 
         self.heap_free_blocks.insert(index, (base_address, words))
@@ -272,10 +275,12 @@ class VMMemory:
             if prev_base + prev_size == base_address:
                 base_address = prev_base
                 words += prev_size
-                self.heap_free_blocks[index - 1:index + 1] = [(base_address, words)]
+                self.heap_free_blocks[index - 1 : index + 1] = [(base_address, words)]
                 index -= 1
 
         if index + 1 < len(self.heap_free_blocks):
             next_base, next_size = self.heap_free_blocks[index + 1]
             if base_address + words == next_base:
-                self.heap_free_blocks[index:index + 2] = [(base_address, words + next_size)]
+                self.heap_free_blocks[index : index + 2] = [
+                    (base_address, words + next_size)
+                ]

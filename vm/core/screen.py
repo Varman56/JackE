@@ -218,7 +218,9 @@ class ScreenWorker(Thread):
 
     def _write_screen(self, segment_index: int, value: int) -> None:
         if value < 0:
-            value = 2 ** 16 + value  # заменяем отрицательное число на соответствующее положительное
+            value = (
+                2**16 + value
+            )  # заменяем отрицательное число на соответствующее положительное
         bits = bin(value)[2:].zfill(16)[::-1]
 
         # координаты начала сегмента экрана, за который отвечает данный адрес
@@ -226,7 +228,7 @@ class ScreenWorker(Thread):
         x = segment_index % (512 // 16) * 16
 
         for ind in range(16):
-            clr = (0, 0, 0) if bits[ind] == '1' else (255, 255, 255)
+            clr = (0, 0, 0) if bits[ind] == "1" else (255, 255, 255)
             self.screen.set_at((x + ind, y), clr)
 
     def _read_screen(self, segment_index: int, answer_queue: Queue) -> None:
@@ -239,10 +241,10 @@ class ScreenWorker(Thread):
         for ind in range(16):
             clr = self.screen.get_at([x + ind, y])[:3]
             if clr != WHITE:
-                res += 2 ** ind
+                res += 2**ind
 
-        if res > 2 ** 15 - 1:
-            res -= 2 ** 16
+        if res > 2**15 - 1:
+            res -= 2**16
 
         answer_queue.put(res)
 
@@ -295,5 +297,7 @@ class ScreenWorker(Thread):
 
     def read_screen(self, segment_index: int) -> int:
         answer_queue: Queue[int] = Queue(maxsize=1)
-        self.commands.put(Command(CommandType.READ_SCREEN, [segment_index], answer_queue))
+        self.commands.put(
+            Command(CommandType.READ_SCREEN, [segment_index], answer_queue)
+        )
         return answer_queue.get()
