@@ -10,6 +10,7 @@ from vm.core.screen import ScreenWorker
 from vm.builtin.array import ArrayLibrary
 from vm.builtin.keyboard import KeyboardLibrary
 from vm.builtin.math import MathLibrary
+from vm.builtin.memory import MemoryLibrary
 from vm.builtin.output import OutputLibrary
 from vm.builtin.registry import BuiltinRegistry
 from vm.builtin.screen import ScreenLibrary
@@ -52,6 +53,7 @@ class VirtualMachine:
         self.builtin_registry.register_library(KeyboardLibrary())
         self.builtin_registry.register_library(ScreenLibrary())
         self.builtin_registry.register_library(SysLibrary())
+        self.builtin_registry.register_library(MemoryLibrary())
 
     def run_program(self, program: Program):
         """
