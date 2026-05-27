@@ -73,6 +73,8 @@ class CommandType(Enum):
     DRAW_CIRCLE = "drawCircle"
     CLEAR_RECTANGLE = "clearRectangle"
     DRAW_FONT_PIXEL = "drawFontPixel"
+    GET_PIXEL_COLOR = "getPixelColor"
+    DRAW_PIXEL_COLOR = "drawPixelColor"
 
 
 @dataclass(frozen=True)
@@ -147,6 +149,8 @@ class ScreenWorker(Thread):
                     self._draw_pixel(*command.args)
                 case CommandType.DRAW_FONT_PIXEL:
                     self._draw_font_pixel(*command.args)
+                case CommandType.DRAW_PIXEL_COLOR:
+                    self._draw_pixel_color(*command.args)
                 case CommandType.DRAW_LINE:
                     self._draw_line(*command.args)
                 case CommandType.DRAW_RECTANGLE:
@@ -155,6 +159,8 @@ class ScreenWorker(Thread):
                     self._draw_circle(*command.args)
                 case CommandType.CLEAR_RECTANGLE:
                     self._clear_rectangle(*command.args)
+                case CommandType.GET_PIXEL_COLOR:
+                    self._get_pixel_color(*command.args, command.answer_queue)
         pygame.display.update()
 
     def close_screen(self) -> None:
@@ -196,6 +202,13 @@ class ScreenWorker(Thread):
         dx, dy = x2 - x1 + 1, y2 - y1 + 1
         pygame.draw.rect(self.screen, WHITE, (x1, y1, dx, dy))
 
+    def _get_pixel_color(self, x: int, y: int, answer_queue: Queue) -> None:
+        pixel_color = self.screen.get_at([x, y])
+        answer_queue.put(pixel_color[:3])
+    
+    def _draw_pixel_color(self, x: int, y: int, r: int, g: int, b: int) -> None:
+        self.screen.set_at((x, y), (r, g, b))
+
     def clear_screen(self) -> None:
         self.commands.put(Command(CommandType.CLEAR_SCREEN))
 
@@ -223,6 +236,49 @@ class ScreenWorker(Thread):
     def clear_rectangle(self, x1: int, y1: int, x2: int, y2: int) -> None:
         self.commands.put(Command(CommandType.CLEAR_RECTANGLE, [x1, y1, x2, y2]))
 
+    def get_pixel_color(self, x: int, y: int) -> tuple[int, int, int]:
+        answer_queue: Queue[tuple[int, int, int]] = Queue(maxsize=1)
+        self.commands.put(Command(CommandType.GET_PIXEL_COLOR, [x, y], answer_queue))
+        return answer_queue.get()
+
+    def draw_pixel_color(self, x: int, y: int, rgb: tuple[int, int, int]) -> None:
+        r, g, b = rgb
+        self.commands.put(Command(CommandType.DRAW_PIXEL_COLOR, [x, y, r, g, b]))
+
     def key_pressed(self) -> int:
         with self._key_lock:
             return self._key_pressed
+
+    def set_key_pressed(self, value: int) -> None:
+        with self._key_lock:
+            self._key_pressed = value
+
+    def write_screen(self, segment_index: int, value: int) -> None:
+        if value < 0:
+            value = 2 ** 16 + value  # заменяем отрицательное число на соответствующее положительное
+        bits = bin(value)[2:].zfill(16)[::-1]
+
+        # координаты начала сегмента экрана, за который отвечает данный адрес
+        y = segment_index // (512 // 16)
+        x = segment_index % (512 // 16) * 16
+
+        for ind in range(16):
+            clr = (0, 0, 0) if bits[ind] == '1' else (255, 255, 255)
+            self.draw_pixel_color(x + ind, y, clr)
+
+    def read_screen(self, segment_index: int) -> int:
+        # координаты начала сегмента экрана, за который отвечает данный адрес
+        y = segment_index // (512 // 16)
+        x = segment_index % (512 // 16) * 16
+
+        res = 0
+
+        for ind in range(16):
+            clr = self.get_pixel_color(x + ind, y)
+            if clr != WHITE:
+                res += 2 ** ind
+
+        if res > 2 ** 15 - 1:
+            res -= 2 ** 16
+
+        return res

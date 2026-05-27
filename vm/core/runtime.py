@@ -25,12 +25,12 @@ class VirtualMachine:
     """
 
     def __init__(self, debug: bool = False):
-        self.debug = debug
-        self.memory = VMMemory()
-
         self.screen = ScreenWorker()
         self.screen.start()
         self.screen.ready.wait()
+
+        self.debug = debug
+        self.memory = VMMemory(self.screen)
 
         self.builtin_registry = BuiltinRegistry()
         self._register_builtin_libraries()

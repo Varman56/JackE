@@ -3,6 +3,8 @@ Memory management for Hack VM
 Управление сегментами памяти виртуальной машины
 """
 
+from vm.core.screen import ScreenWorker
+
 
 class VMMemory:
     """
@@ -29,8 +31,9 @@ class VMMemory:
     STATIC_BASE = 16  # Static variables start
     HEAP_START = 2048  # Начало кучи для объектов (Array, String)
     HEAP_LIMIT = 16384  # До экрана Hack RAM
+    KBD = 24576  # Регистр, в котором должен храниться код нажатой клавиши клавиатуры
 
-    def __init__(self, memory_size: int = 32768):
+    def __init__(self, screen: ScreenWorker, memory_size: int = 32768):
         """
         Инициализация памяти VM
 
@@ -58,6 +61,8 @@ class VMMemory:
         self.heap_next_free = self.HEAP_START
         self.heap_allocations: dict[int, int] = {}
         self.heap_free_blocks: list[tuple[int, int]] = []
+
+        self.screen = screen
 
     def reset_heap(self):
         """Сбрасывает состояние кучи."""
@@ -132,7 +137,16 @@ class VMMemory:
             return self.static_vars[self.current_file][index]
         else:
             addr = self.get_segment_address(segment, index)
-            return self.memory[addr]
+            return self.read_memory(addr)
+            # return self.memory[addr]
+
+    def read_memory(self, address: int) -> int:
+        if address < self.HEAP_LIMIT or address > self.KBD:
+            return self.memory[address]
+        elif address == self.KBD:
+            return self.screen.key_pressed()
+        else:
+            return self.screen.read_screen(address - self.HEAP_LIMIT)
 
     def write_segment(self, segment: str, index: int, value: int):
         """Записывает значение в сегмент"""
@@ -142,7 +156,16 @@ class VMMemory:
             self.static_vars[self.current_file][index] = value
         else:
             addr = self.get_segment_address(segment, index)
-            self.memory[addr] = value
+            self.write_memory(addr, value)
+            # self.memory[addr] = value
+
+    def write_memory(self, address: int, value: int) -> None:
+        if address < self.HEAP_LIMIT or address > self.KBD:
+            self.memory[address] = value
+        elif address == self.KBD:
+            self.screen.set_key_pressed(value)
+        else:
+            self.screen.write_screen(address - self.HEAP_LIMIT, value)
 
     def get_stack_pointer(self) -> int:
         """Возвращает текущее значение stack pointer"""

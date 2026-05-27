@@ -25,14 +25,12 @@ class MemoryLibrary:
     @staticmethod
     def _peek(args: list[int], vm: VirtualMachine) -> int:
         address = args[0]
-        # TODO SCREEN and KBD
-        return vm.memory.memory[address]
+        return vm.memory.read_memory(address)
 
     @staticmethod
     def _poke(args: list[int], vm: VirtualMachine) -> int:
         address, value = args[0], args[1]
-        # TODO SCREEN and KBD
-        vm.memory.memory[address] = value
+        vm.memory.write_memory(address, value)
         return 0
 
     @staticmethod
