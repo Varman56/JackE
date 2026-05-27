@@ -75,6 +75,8 @@ class CommandType(Enum):
     DRAW_FONT_PIXEL = "drawFontPixel"
     GET_PIXEL_COLOR = "getPixelColor"
     DRAW_PIXEL_COLOR = "drawPixelColor"
+    READ_SCREEN = "readScreen"
+    WRITE_SCREEN = "writeScreen"
 
 
 @dataclass(frozen=True)
@@ -131,8 +133,9 @@ class ScreenWorker(Thread):
                             self._key_pressed = 0
 
             self._process_commands()
-            self.clock.tick(FPS)
+            # self.clock.tick(FPS)
 
+        self._process_commands()
         pygame.quit()
 
     def _process_commands(self) -> None:
@@ -161,6 +164,10 @@ class ScreenWorker(Thread):
                     self._clear_rectangle(*command.args)
                 case CommandType.GET_PIXEL_COLOR:
                     self._get_pixel_color(*command.args, command.answer_queue)
+                case CommandType.READ_SCREEN:
+                    self._read_screen(*command.args, command.answer_queue)
+                case CommandType.WRITE_SCREEN:
+                    self._write_screen(*command.args)
         pygame.display.update()
 
     def close_screen(self) -> None:
@@ -205,9 +212,39 @@ class ScreenWorker(Thread):
     def _get_pixel_color(self, x: int, y: int, answer_queue: Queue) -> None:
         pixel_color = self.screen.get_at([x, y])
         answer_queue.put(pixel_color[:3])
-    
+
     def _draw_pixel_color(self, x: int, y: int, r: int, g: int, b: int) -> None:
         self.screen.set_at((x, y), (r, g, b))
+
+    def _write_screen(self, segment_index: int, value: int) -> None:
+        if value < 0:
+            value = 2 ** 16 + value  # заменяем отрицательное число на соответствующее положительное
+        bits = bin(value)[2:].zfill(16)[::-1]
+
+        # координаты начала сегмента экрана, за который отвечает данный адрес
+        y = segment_index // (512 // 16)
+        x = segment_index % (512 // 16) * 16
+
+        for ind in range(16):
+            clr = (0, 0, 0) if bits[ind] == '1' else (255, 255, 255)
+            self.screen.set_at((x + ind, y), clr)
+
+    def _read_screen(self, segment_index: int, answer_queue: Queue) -> None:
+        # координаты начала сегмента экрана, за который отвечает данный адрес
+        y = segment_index // (512 // 16)
+        x = segment_index % (512 // 16) * 16
+
+        res = 0
+
+        for ind in range(16):
+            clr = self.screen.get_at([x + ind, y])[:3]
+            if clr != WHITE:
+                res += 2 ** ind
+
+        if res > 2 ** 15 - 1:
+            res -= 2 ** 16
+
+        answer_queue.put(res)
 
     def clear_screen(self) -> None:
         self.commands.put(Command(CommandType.CLEAR_SCREEN))
@@ -254,31 +291,9 @@ class ScreenWorker(Thread):
             self._key_pressed = value
 
     def write_screen(self, segment_index: int, value: int) -> None:
-        if value < 0:
-            value = 2 ** 16 + value  # заменяем отрицательное число на соответствующее положительное
-        bits = bin(value)[2:].zfill(16)[::-1]
-
-        # координаты начала сегмента экрана, за который отвечает данный адрес
-        y = segment_index // (512 // 16)
-        x = segment_index % (512 // 16) * 16
-
-        for ind in range(16):
-            clr = (0, 0, 0) if bits[ind] == '1' else (255, 255, 255)
-            self.draw_pixel_color(x + ind, y, clr)
+        self.commands.put(Command(CommandType.WRITE_SCREEN, [segment_index, value]))
 
     def read_screen(self, segment_index: int) -> int:
-        # координаты начала сегмента экрана, за который отвечает данный адрес
-        y = segment_index // (512 // 16)
-        x = segment_index % (512 // 16) * 16
-
-        res = 0
-
-        for ind in range(16):
-            clr = self.get_pixel_color(x + ind, y)
-            if clr != WHITE:
-                res += 2 ** ind
-
-        if res > 2 ** 15 - 1:
-            res -= 2 ** 16
-
-        return res
+        answer_queue: Queue[int] = Queue(maxsize=1)
+        self.commands.put(Command(CommandType.READ_SCREEN, [segment_index], answer_queue))
+        return answer_queue.get()
