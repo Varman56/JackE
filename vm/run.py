@@ -6,7 +6,6 @@ Hack VM - главный файл для запуска виртуальной �
 import argparse
 from pathlib import Path
 
-from vm.builtin.screen import ScreenLibrary
 from vm.core.instruction import Function
 from vm.core.program import Program
 from vm.core.runtime import VirtualMachine

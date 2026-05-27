@@ -36,10 +36,15 @@ class KeyboardLibrary:
         OutputLibrary._print_char([0], vm)  # Отрисовка курсора
         char = 0
 
-        while vm.screen.is_alive() and (char := KeyboardLibrary._key_pressed([], vm)) == 0:
+        while (
+            vm.screen.is_alive() and (char := KeyboardLibrary._key_pressed([], vm)) == 0
+        ):
             pass
 
-        while vm.screen.is_alive() and (new_char := KeyboardLibrary._key_pressed([], vm)) != 0:
+        while (
+            vm.screen.is_alive()
+            and (new_char := KeyboardLibrary._key_pressed([], vm)) != 0
+        ):
             char = new_char
 
         if char not in (128, 129):

@@ -92,11 +92,12 @@ class OutputLibrary:
             return 0
 
         x, y = OutputLibrary.cursor.get_cords()
-        vm.screen.clear_rectangle(x * CHAR_WIDTH,
-                                  y * CHAR_HEIGHT,
-                                  (x + 1) * CHAR_HEIGHT - 1,
-                                  (y + 1) * CHAR_HEIGHT - 1,
-                                  )
+        vm.screen.clear_rectangle(
+            x * CHAR_WIDTH,
+            y * CHAR_HEIGHT,
+            (x + 1) * CHAR_HEIGHT - 1,
+            (y + 1) * CHAR_HEIGHT - 1,
+        )
 
         char = OutputLibrary.font.get_char(value)
         for ch_y in range(CHAR_HEIGHT):
@@ -136,11 +137,12 @@ class OutputLibrary:
     def _back_space(args: list[int], vm: VirtualMachine) -> int:
         x, y = OutputLibrary.cursor.get_cords()
 
-        vm.screen.clear_rectangle(x * CHAR_WIDTH,
-                                  y * CHAR_HEIGHT,
-                                  (x + 1) * CHAR_HEIGHT - 1,
-                                  (y + 1) * CHAR_HEIGHT - 1,
-                                  )
+        vm.screen.clear_rectangle(
+            x * CHAR_WIDTH,
+            y * CHAR_HEIGHT,
+            (x + 1) * CHAR_HEIGHT - 1,
+            (y + 1) * CHAR_HEIGHT - 1,
+        )
 
         OutputLibrary.cursor.move_left()
         return 0
@@ -149,8 +151,9 @@ class OutputLibrary:
     def _clear_cursor(vm) -> None:
         x, y = OutputLibrary.cursor.get_cords()
 
-        vm.screen.clear_rectangle(x * CHAR_WIDTH,
-                                  y * CHAR_HEIGHT,
-                                  (x + 1) * CHAR_HEIGHT - 1,
-                                  (y + 1) * CHAR_HEIGHT - 1,
-                                  )
+        vm.screen.clear_rectangle(
+            x * CHAR_WIDTH,
+            y * CHAR_HEIGHT,
+            (x + 1) * CHAR_HEIGHT - 1,
+            (y + 1) * CHAR_HEIGHT - 1,
+        )
