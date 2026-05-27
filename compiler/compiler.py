@@ -36,17 +36,23 @@ class Compiler:
     ) -> None:
         self.path = Path(path)
         self.out_path = Path(out_path)
-        self.grammar_file = grammar_file
-        self.states_file = states_file
+        self.grammar_file = Path(grammar_file)
+        self.states_file = Path(states_file)
         self.ignore_build_exist = ignore_build_exist
         if build_grammar:
             self._try_build_grammar()
-        self.parser = Parser(grammar_file=grammar_file, states_file=states_file)
+        self.parser = Parser(
+            grammar_file=str(self.grammar_file),
+            states_file=str(self.states_file),
+        )
 
     def _try_build_grammar(self):
         """Построение грамматики (таблицы slr анализатора)"""
         print("Building grammar...")
-        slr = SLRParser(filename=self.grammar_file, outfile=self.states_file)
+        slr = SLRParser(
+            filename=str(self.grammar_file),
+            outfile=str(self.states_file),
+        )
         if slr.errors:
             print(
                 f"Обнаружено конфликтов: {len(slr.errors)}. Грамматика может быть не SLR(1)."
@@ -73,20 +79,17 @@ class Compiler:
     @staticmethod
     def _open_file(filename: Path) -> str:
         """Открыть файл и прочитать данные"""
-        with open(filename, encoding="utf-8", mode="r") as f:
-            try:
-                text = f.read()
-            except Exception as e:
-                print("Error during read file: ", e)
-                return ""
-        return text
+        try:
+            return filename.read_text(encoding="utf-8")
+        except Exception as e:
+            print("Error during read file: ", e)
+            return ""
 
     def save_vm_file(self, vm_commands, class_name) -> str:
         """Сохранение .vm файла"""
-        out_path = f"{self.out_path}\\{class_name}.vm"
-        with open(out_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(vm_commands) + "\n")
-        return out_path
+        out_path = self.out_path / f"{class_name}.vm"
+        out_path.write_text("\n".join(vm_commands) + "\n", encoding="utf-8")
+        return str(out_path)
 
     def _prepare_build(self) -> None:
         """Очистка директрии сохранения .vm файлов"""
