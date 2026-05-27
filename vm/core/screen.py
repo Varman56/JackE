@@ -66,11 +66,13 @@ def _get_key_code(key: int) -> int:
 class CommandType(Enum):
     CLEAR_SCREEN = "clearScreen"
     SET_COLOR = "setColor"
+    SET_FONT_COLOR = "setFontColor"
     DRAW_PIXEL = "drawPixel"
     DRAW_LINE = "drawLine"
     DRAW_RECTANGLE = "drawRectangle"
     DRAW_CIRCLE = "drawCircle"
     CLEAR_RECTANGLE = "clearRectangle"
+    DRAW_FONT_PIXEL = "drawFontPixel"
 
 
 @dataclass(frozen=True)
@@ -92,6 +94,7 @@ class ScreenWorker(Thread):
 
         self.screen: pygame.Surface | None = None
         self.color: tuple[int, int, int] = BLACK
+        self.font_color: tuple[int, int, int] = BLACK
         self.clock: pygame.time.Clock | None = None
 
         self._key_pressed = 0
@@ -138,8 +141,12 @@ class ScreenWorker(Thread):
                     self._clear_screen()
                 case CommandType.SET_COLOR:
                     self._set_color(*command.args)
+                case CommandType.SET_FONT_COLOR:
+                    self._set_font_color(*command.args)
                 case CommandType.DRAW_PIXEL:
                     self._draw_pixel(*command.args)
+                case CommandType.DRAW_FONT_PIXEL:
+                    self._draw_font_pixel(*command.args)
                 case CommandType.DRAW_LINE:
                     self._draw_line(*command.args)
                 case CommandType.DRAW_RECTANGLE:
@@ -160,8 +167,14 @@ class ScreenWorker(Thread):
     def _set_color(self, r: int, g: int, b: int) -> None:
         self.color = (r, g, b)
 
+    def _set_font_color(self, r: int, g: int, b: int) -> None:
+        self.font_color = (r, g, b)
+
     def _draw_pixel(self, x: int, y: int) -> None:
         self.screen.set_at((x, y), self.color)
+
+    def _draw_font_pixel(self, x: int, y: int) -> None:
+        self.screen.set_at((x, y), self.font_color)
 
     def _draw_line(self, x1: int, y1: int, x2: int, y2: int) -> None:
         pygame.draw.line(self.screen, self.color, (x1, y1), (x2, y2))
@@ -189,8 +202,14 @@ class ScreenWorker(Thread):
     def set_color(self, r: int, g: int, b: int) -> None:
         self.commands.put(Command(CommandType.SET_COLOR, [r, g, b]))
 
+    def set_font_color(self, r: int, g: int, b: int) -> None:
+        self.commands.put(Command(CommandType.SET_FONT_COLOR, [r, g, b]))
+
     def draw_pixel(self, x: int, y: int) -> None:
         self.commands.put(Command(CommandType.DRAW_PIXEL, [x, y]))
+
+    def draw_font_pixel(self, x: int, y: int) -> None:
+        self.commands.put(Command(CommandType.DRAW_FONT_PIXEL, [x, y]))
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int) -> None:
         self.commands.put(Command(CommandType.DRAW_LINE, [x1, y1, x2, y2]))

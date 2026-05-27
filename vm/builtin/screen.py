@@ -22,6 +22,9 @@ class ScreenLibrary:
             "setColorRGB": BuiltinFunction(
                 num_args=3, implementation=self._set_color_RGB
             ),
+            "setFontColor": BuiltinFunction(
+                num_args=3, implementation=self._set_font_color
+            ),
             "drawPixel": BuiltinFunction(num_args=2, implementation=self._draw_pixel),
             "drawLine": BuiltinFunction(num_args=4, implementation=self._draw_line),
             "drawRectangle": BuiltinFunction(
@@ -50,6 +53,12 @@ class ScreenLibrary:
     def _set_color_RGB(args: list[int], vm: VirtualMachine) -> int:
         r, g, b = args[0], args[1], args[2]
         vm.screen.set_color(r, g, b)
+        return 0
+
+    @staticmethod
+    def _set_font_color(args: list[int], vm: VirtualMachine) -> int:
+        r, g, b = args[0], args[1], args[2]
+        vm.screen.set_font_color(r, g, b)
         return 0
 
     @staticmethod

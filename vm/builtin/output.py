@@ -104,7 +104,7 @@ class OutputLibrary:
             for ch_x in range(CHAR_WIDTH):
                 if not char[ch_y][ch_x]:
                     continue
-                vm.screen.draw_pixel(x * CHAR_WIDTH + ch_x, y * CHAR_HEIGHT + ch_y)
+                vm.screen.draw_font_pixel(x * CHAR_WIDTH + ch_x, y * CHAR_HEIGHT + ch_y)
 
         if value != 0:
             OutputLibrary.cursor.move_right()
