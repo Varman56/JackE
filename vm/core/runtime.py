@@ -87,8 +87,6 @@ class VirtualMachine:
             if instruction.should_advance():
                 program.next_instruction()
 
-        self.screen.close_screen()
-
         if self.debug:
             print(
                 f"\nПрограмма завершена. Stack pointer: {self.memory.get_stack_pointer()}"

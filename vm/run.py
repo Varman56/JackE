@@ -125,7 +125,6 @@ def main():
         return 0
 
     except Exception as e:
-        vm.screen.close_screen()
         print(f"Ошибка: {e}")
         if args.debug:
             import traceback
