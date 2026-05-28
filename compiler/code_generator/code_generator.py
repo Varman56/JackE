@@ -1,6 +1,7 @@
 from compiler.errors.code_generator_errors import (
     ErrUnknownFunc,
     ErrUnknownSymbol,
+    ErrInvalidCallParametrCount,
 )
 from compiler.tokenizer.token_type import TokenType
 from compiler.code_generator.symbol_table import SymbolKind, SymbolTable
@@ -324,6 +325,11 @@ class CodeGenerator:
             if sig.kind == SubroutineKind.method:
                 writable.vm.write_push("pointer", 0)
             if len(args) == 4:  # SubroutineName '(' ExpressionList ')'
+                n_params = args[2].kwargs["n_params"]
+                if sig.nargs != n_params:
+                    raise ErrInvalidCallParametrCount(
+                        sig.nargs, n_params, *args[0].start_token.get_pos()
+                    )
                 writable.extend(args[2].vm)
             writable.vm.write_call(full_name, sig.get_nargs())
 
@@ -344,18 +350,25 @@ class CodeGenerator:
                     raise ErrUnknownFunc(full_name, *args[2].start_token.get_pos())
 
             if len(args) == 6:  # VarName '.' SubroutineName '(' ExpressionList ')'
+                n_params = args[4].kwargs["n_params"]
+                if sig.nargs != n_params:
+                    raise ErrInvalidCallParametrCount(
+                        sig.nargs, n_params, *args[0].start_token.get_pos()
+                    )
                 writable.extend(args[4].vm)
-
             writable.vm.write_call(full_name, sig.get_nargs())
         return writable
 
     # ExpressionList -> Expression
     # ExpressionList -> ExpressionList ',' Expression
     def _handle_expression_list(self, args: HANDLER_TYPE) -> NTwithCode:
-        writable = NTwithCode(NTTitle.ExpressionList, self._get_start_token(args[0]))
+        writable = NTwithCode(
+            NTTitle.ExpressionList, self._get_start_token(args[0]), n_params=1
+        )
         writable.extend(args[0].vm)
         if len(args) == 3:
             writable.extend(args[2].vm)
+            writable.kwargs["n_params"] = args[0].kwargs["n_params"] + 1
         return writable
 
     # UnaryOperationList -> UnaryOperation

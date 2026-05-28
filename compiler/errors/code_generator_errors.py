@@ -8,3 +8,10 @@ class ErrUnknownFunc(NameError):
         super().__init__(
             f"Subroutine '{full_name}' on {pos_x}:{pos_y} not found in global table"
         )
+
+
+class ErrInvalidCallParametrCount(Exception):
+    def __init__(self, n_args: int, n_params: int, pos_x: int, pos_y: int) -> None:
+        super().__init__(
+            f"Invalid parametrs count: {n_params}. Expected {n_args} on {pos_x}:{pos_y}"
+        )
