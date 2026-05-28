@@ -2,7 +2,6 @@ import argparse
 from pathlib import Path
 
 from compiler.compiler import Compiler
-from vm.builtin.screen import ScreenLibrary
 from vm.core.runtime import VirtualMachine
 from vm.run import parse_vm_input
 

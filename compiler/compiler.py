@@ -27,14 +27,14 @@ class Compiler:
     """
 
     def __init__(
-            self,
-            path: str,
-            out_path: str = "./build",
-            grammar_file: str = "./compiler/grammar/grammar.slr",
-            states_file: str = "./compiler/grammar/jack_slr_table.csv",
-            build_grammar: bool = False,
-            ignore_build_exist: bool = False,
-            show_resolved_funcs: bool = False
+        self,
+        path: str,
+        out_path: str = "./build",
+        grammar_file: str = "./compiler/grammar/grammar.slr",
+        states_file: str = "./compiler/grammar/jack_slr_table.csv",
+        build_grammar: bool = False,
+        ignore_build_exist: bool = False,
+        show_resolved_funcs: bool = False,
     ) -> None:
         self.path = Path(path)
         self.out_path = Path(out_path)
@@ -108,7 +108,7 @@ class Compiler:
         self.out_path.mkdir(parents=True, exist_ok=True)
 
     def _precompile(
-            self, subroutine_table: dict[str, Subroutine], filename: Path
+        self, subroutine_table: dict[str, Subroutine], filename: Path
     ) -> bool:
         """Поиск функций и методов для сохранения в таблицу"""
         text = self._open_file(filename)
@@ -123,9 +123,7 @@ class Compiler:
         print(f"Reading {len(files)} files funcs...")
         for file in files:
             if not self._precompile(subroutine_table, file):
-                print(
-                    f"\n-- Error during functions search:  {file} ---"
-                )
+                print(f"\n-- Error during functions search:  {file} ---")
 
         if self.show_resolved_funcs:
             print()
