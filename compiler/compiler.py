@@ -23,22 +23,25 @@ class Compiler:
     - states_file: Путь до slr таблицы (подразумевается файл анализатора jack, она автоматически собирается из грамматики)
     - build_grammar: Пересобрать ли таблицу slr-анализатора из grammar_file в states_file
     - ignore_build_exist: Игнорировать ли предупреждение о перезаписи и удалении всей build папки (Применяйте с осторожностью)
+    - show_resolved_funcs: Вывести обнаруженные функции
     """
 
     def __init__(
-        self,
-        path: str,
-        out_path: str = "./build",
-        grammar_file: str = "./compiler/grammar/grammar.slr",
-        states_file: str = "./compiler/grammar/jack_slr_table.csv",
-        build_grammar: bool = False,
-        ignore_build_exist: bool = False,
+            self,
+            path: str,
+            out_path: str = "./build",
+            grammar_file: str = "./compiler/grammar/grammar.slr",
+            states_file: str = "./compiler/grammar/jack_slr_table.csv",
+            build_grammar: bool = False,
+            ignore_build_exist: bool = False,
+            show_resolved_funcs: bool = False
     ) -> None:
         self.path = Path(path)
         self.out_path = Path(out_path)
         self.grammar_file = Path(grammar_file)
         self.states_file = Path(states_file)
         self.ignore_build_exist = ignore_build_exist
+        self.show_resolved_funcs = show_resolved_funcs
         if build_grammar:
             self._try_build_grammar()
         self.parser = Parser(
@@ -105,7 +108,7 @@ class Compiler:
         self.out_path.mkdir(parents=True, exist_ok=True)
 
     def _precompile(
-        self, subroutine_table: dict[str, Subroutine], filename: Path
+            self, subroutine_table: dict[str, Subroutine], filename: Path
     ) -> bool:
         """Поиск функций и методов для сохранения в таблицу"""
         text = self._open_file(filename)
@@ -119,15 +122,16 @@ class Compiler:
         subroutine_table: dict[str, Subroutine] = {}
         print(f"Reading {len(files)} files funcs...")
         for file in files:
-            print(f"\n--- Processing {file} ---")
-            print(
-                f"-- Functions correctly found:  {self._precompile(subroutine_table, file)} ---"
-            )
+            if not self._precompile(subroutine_table, file):
+                print(
+                    f"\n-- Error during functions search:  {file} ---"
+                )
 
-        print()
-        print("Resolved funcs: ", *subroutine_table.values(), sep="\n")
-        print("And default libraries")
-        print("-" * 50)
+        if self.show_resolved_funcs:
+            print()
+            print("Resolved funcs: ", *subroutine_table.values(), sep="\n")
+            print("And default libraries")
+            print("-" * 50)
 
         subroutine_table = OsSubroutines.get_table() | subroutine_table
 

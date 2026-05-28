@@ -43,7 +43,7 @@ def _run_vm_program(vm_path: Path, debug: bool, show_stack: bool) -> int:
         return 0
 
     except KeyboardInterrupt:
-        ScreenLibrary.close_screen()
+        vm.screen.close_screen()
         print()
         print("=" * 60)
         print("Выполнение программы было прервано пользователем")
@@ -95,6 +95,13 @@ def main():
             ),
         ),
         (
+            ("--show-resolved-funcs",),
+            dict(
+                action="store_true",
+                help="Вывод информации об обнаруженных функциях",
+            ),
+        ),
+        (
             ("--no-run",),
             dict(
                 action="store_true",
@@ -128,6 +135,7 @@ def main():
         states_file=args.states_file,
         build_grammar=args.build_grammar,
         ignore_build_exist=args.ignore_build_exist,
+        show_resolved_funcs=args.show_resolved_funcs,
     )
     input_files = c.get_files()
     if not input_files:

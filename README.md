@@ -13,4 +13,10 @@ After that, the `jacke` command is available from any directory:
 jacke /path/to/jack/files
 ```
 
+Use
+```bash
+jacke -h
+```
+for flags info
+
 You can see compiler docs [here](./compiler/README.md)
