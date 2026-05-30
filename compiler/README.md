@@ -1,42 +1,47 @@
-# Компилятор учебного языка Jack
+# Jack Educational Language Compiler
 
 ## Quick-start
 
-Класс Compiler - основной для использования.
+The `Compiler` class is the main one to use.
 
-Компилятор имеет один позиционный аргумент - путь до .jack файла или папки.
+The compiler takes one positional argument - the path to a `.jack` file or folder.
 
-Если передать папку в качестве аргумента - компилятор рекурсивно пройдет по всем подпапкам данной папки и обнаружит все 
-файлы с раcширением .jack.
+If a folder is passed as an argument, the compiler will recursively traverse all subfolders of that folder and discover
+all files with the `.jack` extension.
 
-Для запуска:
+To run:
+
 ```bash
-uv run python .\main.py "Путь до .jack файлов"
+uv run python .\main.py "Path to .jack files" --no-run
 ```
 
-Скомпилированные .vm файлы будут находится в директории ./build
+The compiled `.vm` files will be placed in the `./build` directory.
 
-## Аргументы
+## Arguments
+
 ```bash
 positional arguments:
-  path                  Путь к .jack файлу или папке
+  path                  Path to a .jack file or folder
 
 options:
   -h, --help            show this help message and exit
   -o, --out-path OUT_PATH
-                        Папка для .vm (default ./build)
+                        Folder for .vm files (default ./build)
   -g, --grammar-file GRAMMAR_FILE
-                        Путь до файла грамматики jack
+                        Path to the Jack grammar file
   -s, --states-file STATES_FILE
-                        Путь до slr таблицы
-  --build-grammar       Пересобрать SLR-таблицу
-  --ignore-build-exist  Игнорировать предупреждение о перезаписи и удалении файлов
+                        Path to the SLR table
+  --build-grammar       Rebuild the SLR table
+  --ignore-build-exist  Ignore the warning about overwriting and deleting files
   --show-resolved-funcs
-                        Вывод информации об обнаруженных функциях
+                        Output information about discovered functions
 ```
 
-## ВНИМАНИЕ
+## WARNING
 
-- Менять файл грамматики без надобности и понимания происходяещго не рекомендуется.
-- При добавлении нетерминала или терминала требуется изменение кода компилятора
-- Стандартная build-директория будет очищаться полностью. Другие - для безопасности иных данных просто перезапишут новые vm файлы. (Для отключения предупреждения см. ignore-build-exist)
+- It is not recommended to change the grammar file without
+  need and understanding of what is going on.
+- Adding a non-terminal or terminal requires changes to the compiler code (`CodeGenerator`, etc.).
+- The standard build directory will be completely cleared.
+  For safety of other data, other directories will only overwrite new vm files. (To disable the warning, see
+  `ignore-build-exist`)
