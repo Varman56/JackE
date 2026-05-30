@@ -1,4 +1,4 @@
-# VM examples
+# VM
 
 Sample Hack VM bytecode programs for the runtime in this repository.
 

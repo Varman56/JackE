@@ -1,4 +1,8 @@
-# Гайд по развертыванию проекта JackE
+# JackE
+
+---
+Этот проект включает в себя компилятор и эмулятор виртуальной машины HACK-компьютера из
+курса [NAND-TO-TETRIS](https://www.nand2tetris.org/).
 
 ## Первоначальная настройка
 
@@ -7,16 +11,19 @@
 Если у вас еще не установлен `uv`, установите его:
 
 **macOS/Linux:**
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **Windows:**
+
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 **Или через pip:**
+
 ```bash
 pip install uv
 ```
@@ -30,24 +37,48 @@ uv sync
 ### 3. Активация виртуального окружения
 
 **macOS/Linux:**
+
 ```bash
 source .venv/bin/activate
 ```
 
 **Windows:**
+
 ```powershell
 .venv\Scripts\activate
 ```
 
-Или используйте `uv run` для запуска команд без явной активации окружения.
+## Quick start
 
-## Разработка
+### Установка JackE как CLI библиотеки
 
-### Запуск VM
+Из корня проекта:
 
 ```bash
-uv run python main.py
+uv pip install -e .
 ```
+
+Для проверки установки получите информацию о флагах:
+
+```bash
+jacke -h
+```
+
+После этого команда `jacke` доступна из любой директории в текущем окружении:
+
+```bash
+jacke /path/to/jack/files
+```
+
+## Компилятор
+
+Дополнительную информацию о компиляторе вы можете найти [здесь](compiler/README_ru.md)
+
+## Виртуальная машина
+
+Дополнительную информацию о вм вы можете найти [здесь](vm/README.md)
+
+## Разработка
 
 ### workflow перед коммитом
 
@@ -85,14 +116,18 @@ uv add package-name
 ## Troubleshooting
 
 ### Проблемы с версией Python
+
 Если требуется Python 3.14, но у вас другая версия:
+
 ```bash
 uv python install 3.14
 uv python pin 3.14
 ```
 
 ### Сброс окружения
+
 ```bash
 rm -rf .venv
 uv sync
 ```
+

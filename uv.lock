@@ -22,8 +22,8 @@ wheels = [
 
 [[package]]
 name = "jacke"
-version = "0.1"
-source = { virtual = "." }
+version = "1"
+source = { editable = "." }
 dependencies = [
     { name = "mypy" },
     { name = "pygame-ce" },
